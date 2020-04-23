@@ -1,27 +1,67 @@
-import { addNumber, cellGroup, createBoard } from "../src/Sudoku"
-import { buildBoard } from "./helpers"
+import { range } from "ramda"
+import { addNumber, cellGroup, createBoard, getEmptyCellPos } from "../src/Sudoku"
+import { buildBoardCells } from "./helpers"
 
 it("Creates a new Board", () => {
   const result = createBoard({ boxWidth: 2, boxHeight: 1 })
 
-  const expected = ["..", ".."]
-  expect(result.cells).toEqual(buildBoard(expected))
+  // prettier-ignore
+  const expected = [
+      "..",
+      "..",
+  ]
+
+  expect(result.cells).toEqual(buildBoardCells(expected))
 })
 
-it("adds a number to a board", () => {
-  const board = createBoard({ boxWidth: 2, boxHeight: 2 })
+describe("addNumber", () => {
+  it("adds a number to a board", () => {
+    const board = createBoard({ boxWidth: 2, boxHeight: 2 })
 
-  const result = addNumber(board)(5, { row: 1, col: 3 })
+    const result = addNumber(board)(5, { row: 1, col: 3 })
 
-  // prettier-ignore
-  const expectedBoard = [
+    // prettier-ignore
+    const expectedBoard = [
+      "....",
+      "...5",
+      "....",
+      "....",
+    ]
+
+    expect(result.cells).toEqual(buildBoardCells(expectedBoard))
+  })
+
+  it("is immutable", () => {
+    const board = createBoard({ boxWidth: 2, boxHeight: 2 })
+
+    addNumber(board)(5, { row: 1, col: 3 })
+
+    // prettier-ignore
+    const expectedBoard = [
     "....",
-    "...5",
+    "....",
     "....",
     "....",
   ]
 
-  expect(result.cells).toEqual(buildBoard(expectedBoard))
+    expect(board.cells).toEqual(buildBoardCells(expectedBoard))
+  })
+})
+
+it("getEmptyCellPos", () => {
+  const initialBoard = createBoard({ boxWidth: 2, boxHeight: 2 })
+  const cells = [
+    [0, 0],
+    [0, 1],
+    [0, 2],
+    [0, 3],
+    [1, 0],
+    [1, 1],
+  ].map((c) => ({ row: c[0], col: c[1] }))
+
+  const board = cells.reduce((b, cell, i) => addNumber(b)(i, cell), initialBoard)
+
+  expect(getEmptyCellPos(board)).toEqual({ row: 1, col: 2 })
 })
 
 it("returns cell Sudoku groups", () => {

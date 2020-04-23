@@ -1,23 +1,24 @@
-import { addNumber, createSolverInfo, fillBoard } from "../src/Solver"
-import { buildBoard } from "./helpers"
+import { addNumber, createSolverInfo, fillBoard, solveBoard } from "../src/Solver"
+import * as Sudoku from "../src/Sudoku"
+import { boardToString, buildBoardCells, cellsToString } from "./helpers"
 
-const randomBuilder = (values: number[]) => {
-  let p = 0
+// const randomBuilder = (values: number[]) => {
+//   let p = 0
 
-  return () => {
-    const v = values[p]
-    p = (p + 1) % values.length
-    return v
-  }
-}
+//   return () => {
+//     const v = values[p]
+//     p = (p + 1) % values.length
+//     return v
+//   }
+// }
 
 describe("Fills a board", () => {
-
   it("adds a number to a board", () => {
-    const solverInfo = createSolverInfo({ boxWidth: 2, boxHeight: 2})
+    const solverInfo = createSolverInfo(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
 
-    const result = addNumber(solverInfo)(3, { row: 3, col: 2})
+    const result = addNumber(solverInfo)(3, { row: 3, col: 2 })
 
+    // prettier-ignore
     const expectedBoard = [
       "....",
       "....",
@@ -32,21 +33,64 @@ describe("Fills a board", () => {
       [11, 11, 11, 11],
     ]
 
-    expect(result.board.cells).toEqual(buildBoard(expectedBoard))
+    // expect(result.board.cells).toEqual(buildBoardCells(expectedBoard))
+    expect(result.filledCount).toEqual(1)
     expect(result.availableNumbersMap).toEqual(expectedAvailableNumbersMap)
   })
 
-  it.skip("2 x 2", () => {
+  it("2 x 2", () => {
+    const result = fillBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
 
-    const result = fillBoard({ boxWidth: 2, boxHeight: 2, randomCellGenerator: randomBuilder([1, 2, 3, 4]) })
-
+    // prettier-ignore
     const expected = [
       "1234",
       "3412",
-      "4123",
-      "2341",
-    ]
+      "2143",
+      "4321"]
 
-    expect(result.cells).toEqual(buildBoard(expected))
+    expect(result.cells).toEqual(buildBoardCells(expected))
+  })
+})
+
+describe("Solves a board", () => {
+  it("3 x 2", () => {
+    // prettier-ignore
+    const cells = [
+      "4....1",
+      "..23..",
+      ".5..3.",
+      ".6..4.",
+      "..54..",
+      "1....5",
+    ]
+    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 2 }, buildBoardCells(cells))
+
+    const result = solveBoard(board)
+
+    const expectedCells = ["436251", "512364", "254136", "361542", "625413", "143625"]
+
+    expect(result.cells).toEqual(buildBoardCells(expectedCells))
+  })
+
+  it("3 x 3", () => {
+    // prettier-ignore
+    const cells = [
+      ".......2.",
+      ".3...9..6",
+      "..1.47...",
+      "...1..47.",
+      "..5...3..",
+      ".27..8...",
+      "...53.8..",
+      "8..2...6.",
+      ".1.......",
+      "",
+    ]
+    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
+
+    const result = solveBoard(board)
+
+    console.log(boardToString(result))
+    // expect(result.cells).toEqual(buildBoardCells(expectedCells))
   })
 })

@@ -1,6 +1,8 @@
+import * as R from "ramda"
 import * as Sudoku from "./Sudoku"
 
-export type AvailableNumbersMap = number[][]
+type AvailableNumbersMask = number
+export type AvailableNumbersMap = AvailableNumbersMask[][]
 
 export const createAvailableNumbersMap = (config: Sudoku.BoardConfig, initialValue = 0): AvailableNumbersMap => {
   const nc = Sudoku.numberCount(config)
@@ -17,6 +19,6 @@ const setUnavailableMutate = (availableNumbersMap: AvailableNumbersMap) => (n: n
 }
 
 export const setUnavailable = (availableNumbersMap: AvailableNumbersMap) => (n: number, cellsPos: Sudoku.CellPos[]) => {
-  const newMap = availableNumbersMap.slice()
+  const newMap = R.clone( availableNumbersMap)
   return cellsPos.reduce((acc, cell) => setUnavailableMutate(acc)(n, cell), newMap)
 }
