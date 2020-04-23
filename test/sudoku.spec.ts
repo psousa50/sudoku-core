@@ -1,43 +1,60 @@
-import { fillBoard } from "../src/solver"
-import { createBoard, emptyCell } from "../src/sudoku"
+import { addNumber, cellGroup, createBoard } from "../src/Sudoku"
+import { buildBoard } from "./helpers"
 
-const toCell = (c: string) => (c === "." ? emptyCell : Number.parseInt(c))
+it("Creates a new Board", () => {
+  const result = createBoard({ boxWidth: 2, boxHeight: 1 })
 
-const buildBoard = (rows: string[]) => rows.map((r) => r.split("").map(toCell))
-
-const randomBuilder = (values: number[]) => {
-  let p = 0
-
-  return () => {
-    const v = values[p]
-    p = (p + 1) % values.length
-    return v
-  }
-}
-
-describe("Creates a new Board", () => {
-  it("4x4", () => {
-    const result = createBoard({ subGridWidth: 2, subGridHeight: 1 })
-
-    const expected = [
-      "..",
-      "..",
-    ]
-    expect(result.cells).toEqual(buildBoard(expected))
-  })
+  const expected = ["..", ".."]
+  expect(result.cells).toEqual(buildBoard(expected))
 })
 
-describe("Fills a board", () => {
-  it("", () => {
+it("adds a number to a board", () => {
+  const board = createBoard({ boxWidth: 2, boxHeight: 2 })
 
-    const result = fillBoard({ subGridWidth: 2, subGridHeight: 2, randomCellGenerator: randomBuilder([1, 2, 3, 4]) })
+  const result = addNumber(board)(5, { row: 1, col: 3 })
 
-    const expected = [
-      "1234",
-      "3412",
-      "4123",
-      "2341",
-    ]
-    expect(result.cells).toEqual(buildBoard(expected))
-  })
+  // prettier-ignore
+  const expectedBoard = [
+    "....",
+    "...5",
+    "....",
+    "....",
+  ]
+
+  expect(result.cells).toEqual(buildBoard(expectedBoard))
+})
+
+it("returns cell Sudoku groups", () => {
+  const board = createBoard({ boxWidth: 3, boxHeight: 3 })
+  const result = cellGroup(board)({ row: 1, col: 3 })
+
+  const expectedCells = [
+    [1, 0],
+    [1, 1],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [3, 3],
+    [4, 3],
+    [5, 3],
+    [6, 3],
+    [7, 3],
+    [8, 3],
+
+    [0, 4],
+    [0, 5],
+
+    [2, 4],
+    [2, 5],
+  ]
+
+  expect(result).toEqual(expect.arrayContaining(expectedCells.map((c) => ({ row: c[0], col: c[1] }))))
 })
