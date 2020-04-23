@@ -21,29 +21,17 @@ export const createSolverInfo = (board: Sudoku.Board): SolverInfo => {
   const nc = Sudoku.numberCount(board)
   const allNumbersAvailable = Math.pow(2, nc) - 1
   const availableNumbersMap = AvailableNumbers.createAvailableNumbersMap(board, allNumbersAvailable)
-  let solverInfo: SolverInfo = {
+  const solverInfo: SolverInfo = {
     availableNumbersMap,
     board: Sudoku.createBoard(board),
     filledCount: 0,
     result: "unknown",
   }
 
-  const iter = Sudoku.boardIterator(board)
-  let done: boolean | undefined = false
-  while (!done) {
-    const p = iter.next()
-    if (!p.done) {
-      const cellPos = p.value
-      const cell = Sudoku.cell(board)(cellPos)
-      if (cell !== Sudoku.emptyCell) {
-        solverInfo = addNumber(solverInfo)(cell, cellPos)
-       }
-    }
-    done = p.done
-  }
-
-  return solverInfo
-
+  return Sudoku.boardCellsPos(board).reduce((acc, cellPos) => {
+    const cell = Sudoku.cell(board)(cellPos)
+    return cell === Sudoku.emptyCell ? acc : addNumber(acc)(cell, cellPos)
+  }, solverInfo)
 }
 
 export const addNumber = (solverInfo: SolverInfo) => (n: number, cellPos: Sudoku.CellPos) => ({
@@ -57,53 +45,57 @@ export const addNumber = (solverInfo: SolverInfo) => (n: number, cellPos: Sudoku
 })
 
 const buildNumberListFromBitMask = (bitMask: number) => {
-  let b = bitMask
-  let list = [] as number[]
-  let n = 1
-  while (b > 0) {
-    const b1 = Math.floor(b / 2)
-    if (b1 !== b / 2) {
-      list = [...list, n]
-    }
-    n = n + 1
-    b = b1
-  }
+  const buildList = (b: number, n: number, list: number[]): number[] =>
+    b === 0 ? list : buildList(Math.floor(b / 2), n + 1, [...list, b / 2 === Math.floor(b / 2) ? 0 : n])
 
-  return list
+  return buildList(bitMask, 1, []).filter((n) => n !== 0)
 }
 
-const fillBoardRec = (solverInfo: SolverInfo, config: SolveBoardConfig): SolverInfo => {
-  const emptyCell = Sudoku.getEmptyCellPos(solverInfo.board)
+const tryNextAvailableNumber = (
+  solverInfo: SolverInfo,
+  config: SolveBoardConfig,
+  availableNumbers: number[],
+  emptyCellPos: Sudoku.CellPos,
+): SolverInfo => {
 
-  if (emptyCell === undefined) {
+  if (availableNumbers.length === 0) {
     return {
       ...solverInfo,
-      result: "valid",
+      result: "invalid",
     }
   }
 
-  const availableNumbersMask = solverInfo.availableNumbersMap[emptyCell.row][emptyCell.col]
-  let availableNumbers = shuffle(config.randomGenerator)(buildNumberListFromBitMask(availableNumbersMask))
-  let done = availableNumbers.length === 0
-  let solverInfoResult: SolverInfo = {
-    ...solverInfo,
-    result: "invalid",
-  }
+  const newSolverInfo = fillNextEmptyCell(addNumber(solverInfo)(availableNumbers[0], emptyCellPos), config)
 
-  while (!done) {
-    const n = availableNumbers[0]
-    availableNumbers = availableNumbers.slice(1)
-    solverInfoResult = fillBoardRec(addNumber(solverInfo)(n, emptyCell), config)
-    done = solverInfoResult.result === "valid" || availableNumbers.length === 0
-  }
+  return newSolverInfo.result === "valid"
+    ? newSolverInfo
+    : tryNextAvailableNumber(solverInfo, config, availableNumbers.slice(1), emptyCellPos)
+}
 
-  return solverInfoResult
+const fillEmptyCell = (solverInfo: SolverInfo, config: SolveBoardConfig, emptyCellPos: Sudoku.CellPos) => {
+  const availableNumbersMask = solverInfo.availableNumbersMap[emptyCellPos.row][emptyCellPos.col]
+  const list = buildNumberListFromBitMask(availableNumbersMask)
+  const availableNumbers = shuffle(config.randomGenerator)(list)
+
+  return tryNextAvailableNumber(solverInfo, config, availableNumbers, emptyCellPos)
+}
+
+const fillNextEmptyCell = (solverInfo: SolverInfo, config: SolveBoardConfig): SolverInfo => {
+  const emptyCellPos = Sudoku.getEmptyCellPos(solverInfo.board)
+
+  return emptyCellPos === undefined
+    ? {
+        ...solverInfo,
+        result: "valid",
+      }
+    : fillEmptyCell(solverInfo, config, emptyCellPos)
 }
 
 export const fillBoard = (config: FillBoardConfig) => {
   const board = Sudoku.createBoard(config)
   const solverInfo = createSolverInfo(board)
-  const result = fillBoardRec(solverInfo, config)
+
+  const result = fillNextEmptyCell(solverInfo, config)
 
   return result.board
 }
@@ -111,7 +103,6 @@ export const fillBoard = (config: FillBoardConfig) => {
 export const solveBoard = (board: Sudoku.Board) => {
   const solverInfo = createSolverInfo(board)
 
-  const result = fillBoardRec(solverInfo, { randomGenerator: () => 0.9 })
+  return fillNextEmptyCell(solverInfo, { randomGenerator: () => 0.99 })
 
-  return result.board
 }

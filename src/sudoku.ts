@@ -23,8 +23,6 @@ export interface Board extends BoardConfig {
 
 export const numberCount = (config: BoardConfig) => config.boxWidth * config.boxHeight
 
-const toCell = (c: string) => (c === "." ? emptyCell : Number.parseInt(c, 10))
-
 export const createBoard = (config: BoardConfig, cells?: Rows[]): Board => {
   const nc = numberCount(config)
 
@@ -75,6 +73,18 @@ export function* boardIterator(board: Board) {
       yield { row, col }
     }
   }
+}
+
+export function boardCellsPos(board: Board) {
+  const nc = numberCount(board)
+  let cellsPos = [] as CellPos[]
+  for (let row = 0; row < nc; row++) {
+    for (let col = 0; col < nc; col++) {
+      cellsPos = [...cellsPos, { row, col }]
+    }
+  }
+
+  return cellsPos
 }
 
 export const getEmptyCellPos = (board: Board): CellPos | undefined => {

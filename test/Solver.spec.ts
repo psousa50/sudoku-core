@@ -2,16 +2,6 @@ import { addNumber, createSolverInfo, fillBoard, solveBoard } from "../src/Solve
 import * as Sudoku from "../src/Sudoku"
 import { boardToString, buildBoardCells, cellsToString } from "./helpers"
 
-// const randomBuilder = (values: number[]) => {
-//   let p = 0
-
-//   return () => {
-//     const v = values[p]
-//     p = (p + 1) % values.length
-//     return v
-//   }
-// }
-
 describe("Fills a board", () => {
   it("adds a number to a board", () => {
     const solverInfo = createSolverInfo(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
@@ -69,7 +59,7 @@ describe("Solves a board", () => {
 
     const expectedCells = ["436251", "512364", "254136", "361542", "625413", "143625"]
 
-    expect(result.cells).toEqual(buildBoardCells(expectedCells))
+    expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
   })
 
   it("3 x 3", () => {
@@ -90,7 +80,19 @@ describe("Solves a board", () => {
 
     const result = solveBoard(board)
 
-    console.log(boardToString(result))
-    // expect(result.cells).toEqual(buildBoardCells(expectedCells))
+    const expectedCells = [
+      "678315924",
+      "534829716",
+      "291647538",
+      "986153472",
+      "145762389",
+      "327498651",
+      "462531897",
+      "859274163",
+      "713986245",
+    ]
+
+    console.log(boardToString(result.board))
+    expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
   })
 })

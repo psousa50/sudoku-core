@@ -19,7 +19,7 @@ const test1 = () => {
   const result = SudokuSolver.solveBoard(board)
 
   const t1 = Date.now()
-  console.log(boardToString(result))
+  console.log(boardToString(result.board))
   const t2 = Date.now()
   console.log("=====>\n", t2 - t1)
 }
@@ -42,8 +42,8 @@ const test2 = () => {
   const result = SudokuSolver.solveBoard(board)
   const t2 = Date.now()
 
-  console.log(boardToString(result))
-  console.log("=====>\n", t2 - t1)
+  console.log(boardToString(result.board))
+  console.log(t2 - t1)
 }
 
 test2()
