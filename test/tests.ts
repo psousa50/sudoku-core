@@ -39,6 +39,12 @@ const test2 = () => {
   const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
 
   const t1 = Date.now()
+  SudokuSolver.solveBoard(board)
+  SudokuSolver.solveBoard(board)
+  SudokuSolver.solveBoard(board)
+  SudokuSolver.solveBoard(board)
+  SudokuSolver.solveBoard(board)
+  SudokuSolver.solveBoard(board)
   const result = SudokuSolver.solveBoard(board)
   const t2 = Date.now()
 

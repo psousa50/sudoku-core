@@ -1,5 +1,6 @@
 import * as R from "ramda"
 import * as Sudoku from "./Sudoku"
+import { pow2 } from "./utils"
 
 type AvailableNumbersMask = number
 export type AvailableNumbersMap = AvailableNumbersMask[][]
@@ -13,7 +14,7 @@ const setUnavailableMutate = (availableNumbersMap: AvailableNumbersMap) => (n: n
   // tslint:disable: no-bitwise
   const nc = availableNumbersMap.length
   const actual = availableNumbersMap[cellPos.row][cellPos.col]
-  const newValue = (Math.pow(2, nc) - 1) ^ Math.pow(2, n - 1)
+  const newValue = pow2(nc) - 1 ^ pow2(n - 1)
   availableNumbersMap[cellPos.row][cellPos.col] = actual & newValue
   return availableNumbersMap
 }

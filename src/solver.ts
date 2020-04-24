@@ -1,6 +1,7 @@
+import * as R from "ramda"
 import * as AvailableNumbers from "./AvailableNumbers"
 import * as Sudoku from "./Sudoku"
-import { RandomGenerator, shuffle } from "./utils"
+import { pow2, RandomGenerator, shuffle } from "./utils"
 
 export interface FillBoardConfig extends Sudoku.BoardConfig {
   randomGenerator: RandomGenerator
@@ -19,7 +20,7 @@ interface SolverInfo {
 
 export const createSolverInfo = (board: Sudoku.Board): SolverInfo => {
   const nc = Sudoku.numberCount(board)
-  const allNumbersAvailable = Math.pow(2, nc) - 1
+  const allNumbersAvailable = pow2(nc) - 1
   const availableNumbersMap = AvailableNumbers.createAvailableNumbersMap(board, allNumbersAvailable)
   const solverInfo: SolverInfo = {
     availableNumbersMap,
