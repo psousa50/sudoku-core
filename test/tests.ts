@@ -1,8 +1,12 @@
+import * as R from "ramda"
+import random from "random"
+import seedrandom from "seedrandom"
 import * as SudokuSolver from "../src/Solver"
 import * as Sudoku from "../src/Sudoku"
+import { rnd0ToMaxExclusive, shuffle, shuffleWith } from "../src/utils"
 import { boardToString, buildBoardCells } from "./helpers"
 
-const test1 = () => {
+export const test1 = () => {
   const cells = [
     ".......2.",
     ".3...9..6",
@@ -24,7 +28,7 @@ const test1 = () => {
   console.log("=====>\n", t2 - t1)
 }
 
-const test2 = () => {
+export const test2 = () => {
   const cells = [
     ".4...6.3.",
     "7...4...1",
@@ -52,4 +56,23 @@ const test2 = () => {
   console.log(t2 - t1)
 }
 
-test2()
+export const test3 = () => {
+
+  random.use(seedrandom("1"))
+  const randomGenerator = () => random.float()
+
+  const validBoard = SudokuSolver.fillBoardPrivate({ boxWidth: 3, boxHeight: 3, randomGenerator })
+  console.log(boardToString(validBoard))
+  console.log("========================\n")
+
+  const cellsToRemove = shuffleWith(randomGenerator)(Sudoku.boardCellsPos(validBoard)).slice(1)
+  const puzzle = cellsToRemove.reduce((acc, cell) => Sudoku.clearCell(acc)(cell), validBoard)
+  console.log(boardToString(puzzle))
+  console.log("========================\n")
+
+  const result = SudokuSolver.solveBoard(puzzle)
+  console.log(boardToString(result.board))
+  console.log("========================\n")
+}
+
+test3()

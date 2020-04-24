@@ -1,4 +1,4 @@
-import { addNumber, createSolverInfo, fillBoard, solveBoard } from "../src/Solver"
+import { addNumber, createSolverInfo, fillBoardPrivate, solveBoard } from "../src/Solver"
 import * as Sudoku from "../src/Sudoku"
 import { boardToString, buildBoardCells, cellsToString } from "./helpers"
 
@@ -29,7 +29,7 @@ describe("Fills a board", () => {
   })
 
   it("2 x 2", () => {
-    const result = fillBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
+    const result = fillBoardPrivate({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
 
     // prettier-ignore
     const expected = [

@@ -46,6 +46,15 @@ export const addNumber = (board: Board) => (n: number, cellPos: CellPos) => {
   }
 }
 
+export const clearCell = (board: Board) => (cellPos: CellPos) => {
+  const newCells = R.clone(board.cells)
+  newCells[cellPos.row][cellPos.col] = emptyCell
+  return {
+    ...board,
+    cells: newCells,
+  }
+}
+
 export const cellGroup = (board: Board) => (cellPos: CellPos) => {
   const nc = numberCount(board)
   const boxRow = Math.floor(cellPos.row / board.boxHeight) * board.boxHeight

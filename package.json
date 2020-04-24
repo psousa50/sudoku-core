@@ -22,11 +22,15 @@
   "license": "ISC",
   "dependencies": {
     "fp-ts": "^2.5.3",
-    "ramda": "^0.26.1"
+    "ramda": "^0.26.1",
+    "random": "^2.2.0",
+    "seedrandom": "^3.0.5"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
     "@types/ramda": "^0.26.39",
+    "@types/random": "^2.1.1",
+    "@types/seedrandom": "^2.4.28",
     "jest": "^24.9.0",
     "nodemon": "^2.0.2",
     "ts-jest": "^24.3.0",

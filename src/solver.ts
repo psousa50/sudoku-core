@@ -1,14 +1,18 @@
 import * as R from "ramda"
 import * as AvailableNumbers from "./AvailableNumbers"
 import * as Sudoku from "./Sudoku"
-import { pow2, RandomGenerator, shuffle } from "./utils"
+import { pow2, RandomGenerator, shuffleWith } from "./utils"
 
+// tslint:disable-next-line: no-empty-interface
 export interface FillBoardConfig extends Sudoku.BoardConfig {
+}
+
+export interface FillPrivateBoardConfig extends Sudoku.BoardConfig {
   randomGenerator: RandomGenerator
 }
 
-export interface SolveBoardConfig {
-  randomGenerator: RandomGenerator
+export interface SolveBoardPrivateConfig  {
+  randomGenerator?: RandomGenerator
 }
 
 interface SolverInfo {
@@ -54,7 +58,7 @@ const buildNumberListFromBitMask = (bitMask: number) => {
 
 const tryNextAvailableNumber = (
   solverInfo: SolverInfo,
-  config: SolveBoardConfig,
+  config: SolveBoardPrivateConfig,
   availableNumbers: number[],
   emptyCellPos: Sudoku.CellPos,
 ): SolverInfo => {
@@ -73,15 +77,15 @@ const tryNextAvailableNumber = (
     : tryNextAvailableNumber(solverInfo, config, availableNumbers.slice(1), emptyCellPos)
 }
 
-const fillEmptyCell = (solverInfo: SolverInfo, config: SolveBoardConfig, emptyCellPos: Sudoku.CellPos) => {
+const fillEmptyCell = (solverInfo: SolverInfo, config: SolveBoardPrivateConfig, emptyCellPos: Sudoku.CellPos) => {
   const availableNumbersMask = solverInfo.availableNumbersMap[emptyCellPos.row][emptyCellPos.col]
   const list = buildNumberListFromBitMask(availableNumbersMask)
-  const availableNumbers = shuffle(config.randomGenerator)(list)
+  const availableNumbers = config.randomGenerator ? shuffleWith(config.randomGenerator)(list) : list
 
   return tryNextAvailableNumber(solverInfo, config, availableNumbers, emptyCellPos)
 }
 
-const fillNextEmptyCell = (solverInfo: SolverInfo, config: SolveBoardConfig): SolverInfo => {
+const fillNextEmptyCell = (solverInfo: SolverInfo, config: SolveBoardPrivateConfig): SolverInfo => {
   const emptyCellPos = Sudoku.getEmptyCellPos(solverInfo.board)
 
   return emptyCellPos === undefined
@@ -92,11 +96,14 @@ const fillNextEmptyCell = (solverInfo: SolverInfo, config: SolveBoardConfig): So
     : fillEmptyCell(solverInfo, config, emptyCellPos)
 }
 
-export const fillBoard = (config: FillBoardConfig) => {
-  const board = Sudoku.createBoard(config)
+export const fillBoard = (config: FillBoardConfig) => fillBoardPrivate({ ...config, randomGenerator: Math.random })
+
+export const fillBoardPrivate = (config: FillPrivateBoardConfig) => {
+  const privateConfig = { randomGenerator: Math.random, ...config }
+  const board = Sudoku.createBoard(privateConfig)
   const solverInfo = createSolverInfo(board)
 
-  const result = fillNextEmptyCell(solverInfo, config)
+  const result = fillNextEmptyCell(solverInfo, privateConfig)
 
   return result.board
 }
@@ -104,5 +111,5 @@ export const fillBoard = (config: FillBoardConfig) => {
 export const solveBoard = (board: Sudoku.Board) => {
   const solverInfo = createSolverInfo(board)
 
-  return fillNextEmptyCell(solverInfo, { randomGenerator: () => 0.99 })
+  return fillNextEmptyCell(solverInfo, {})
 }
