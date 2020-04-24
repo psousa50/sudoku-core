@@ -80,6 +80,7 @@ describe("Solves a board", () => {
 
     const result = solveBoard(board)
 
+    // prettier-ignore
     const expectedCells = [
       "678315924",
       "534829716",
@@ -92,7 +93,6 @@ describe("Solves a board", () => {
       "713986245",
     ]
 
-    console.log(boardToString(result.board))
     expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
   })
 })

@@ -46,9 +46,9 @@ export const addNumber = (solverInfo: SolverInfo) => (n: number, cellPos: Sudoku
 
 const buildNumberListFromBitMask = (bitMask: number) => {
   const buildList = (b: number, n: number, list: number[]): number[] =>
-    b === 0 ? list : buildList(Math.floor(b / 2), n + 1, [...list, b / 2 === Math.floor(b / 2) ? 0 : n])
+    b === 0 ? list : buildList(Math.floor(b / 2), n + 1, b % 2 === 0 ? list : [...list, n])
 
-  return buildList(bitMask, 1, []).filter((n) => n !== 0)
+  return buildList(bitMask, 1, [])
 }
 
 const tryNextAvailableNumber = (
@@ -104,5 +104,4 @@ export const solveBoard = (board: Sudoku.Board) => {
   const solverInfo = createSolverInfo(board)
 
   return fillNextEmptyCell(solverInfo, { randomGenerator: () => 0.99 })
-
 }
