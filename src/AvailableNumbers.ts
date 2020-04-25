@@ -1,5 +1,5 @@
 import * as R from "ramda"
-import * as Sudoku from "./Sudoku2"
+import * as Sudoku from "./Sudoku"
 import { pow2 } from "./utils"
 
 type AvailableNumbersMask = number

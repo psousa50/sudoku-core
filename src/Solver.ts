@@ -1,6 +1,6 @@
 import * as AvailableNumbers from "./AvailableNumbers"
 import { Constraints } from "./Constraints"
-import * as Sudoku from "./Sudoku2"
+import * as Sudoku from "./Sudoku"
 import { DeepPartial } from "./types"
 import { pow2, RandomGenerator, shuffleWith } from "./utils"
 

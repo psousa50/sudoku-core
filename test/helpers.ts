@@ -1,4 +1,4 @@
-import * as Sudoku from "../src/Sudoku2"
+import * as Sudoku from "../src/Sudoku"
 
 const toCell = (c: string) => (c === "." ? Sudoku.emptyCell : Number.parseInt(c, 10))
 

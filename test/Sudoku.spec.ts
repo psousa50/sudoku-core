@@ -1,5 +1,5 @@
 import { range } from "ramda"
-import { addNumber, constrainedCells, createBoard, getFirstEmptyCellPos } from "../src/Sudoku2"
+import { addNumber, constrainedCells, createBoard, getFirstEmptyCellPos } from "../src/Sudoku"
 import { buildBoardCells } from "./helpers"
 
 it("Creates a new Board", () => {

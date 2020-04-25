@@ -1,5 +1,5 @@
-import { addNumber, createBoard, createSolverState, solveBoard } from "../src/Solver2"
-import * as Sudoku from "../src/Sudoku2"
+import { addNumber, createBoard, createSolverState, solveBoard } from "../src/Solver"
+import * as Sudoku from "../src/Sudoku"
 import { buildBoardCells } from "./helpers"
 
 describe("Fills a board", () => {
