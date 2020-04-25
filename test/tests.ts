@@ -1,8 +1,8 @@
 import * as R from "ramda"
 import random from "random"
 import seedrandom from "seedrandom"
-import * as SudokuSolver from "../src/solver"
-import * as Sudoku from "../src/Sudoku"
+import * as SudokuSolver from "../src/Solver2"
+import * as Sudoku from "../src/Sudoku2"
 import { rnd0ToMaxExclusive, shuffle, shuffleWith } from "../src/utils"
 import { boardToString, buildBoardCells } from "./helpers"
 
