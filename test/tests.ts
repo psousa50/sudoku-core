@@ -1,7 +1,7 @@
 import * as R from "ramda"
 import random from "random"
 import seedrandom from "seedrandom"
-import * as SudokuSolver from "../src/Solver"
+import * as SudokuSolver from "../src/solver"
 import * as Sudoku from "../src/Sudoku"
 import { rnd0ToMaxExclusive, shuffle, shuffleWith } from "../src/utils"
 import { boardToString, buildBoardCells } from "./helpers"
@@ -43,12 +43,6 @@ export const test2 = () => {
   const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
 
   const t1 = Date.now()
-  SudokuSolver.solveBoard(board)
-  SudokuSolver.solveBoard(board)
-  SudokuSolver.solveBoard(board)
-  SudokuSolver.solveBoard(board)
-  SudokuSolver.solveBoard(board)
-  SudokuSolver.solveBoard(board)
   const result = SudokuSolver.solveBoard(board)
   const t2 = Date.now()
 
@@ -61,11 +55,11 @@ export const test3 = () => {
   random.use(seedrandom("1"))
   const randomGenerator = () => random.float()
 
-  const validBoard = SudokuSolver.fillBoardPrivate({ boxWidth: 3, boxHeight: 3, randomGenerator })
+  const validBoard = SudokuSolver.createBoard({ boxWidth: 3, boxHeight: 3, randomGenerator })
   console.log(boardToString(validBoard))
   console.log("========================\n")
 
-  const cellsToRemove = shuffleWith(randomGenerator)(Sudoku.boardCellsPos(validBoard)).slice(1)
+  const cellsToRemove = shuffleWith(randomGenerator)(Sudoku.allCellsPos(validBoard)).slice(1)
   const puzzle = cellsToRemove.reduce((acc, cell) => Sudoku.clearCell(acc)(cell), validBoard)
   console.log(boardToString(puzzle))
   console.log("========================\n")
@@ -73,6 +67,25 @@ export const test3 = () => {
   const result = SudokuSolver.solveBoard(puzzle)
   console.log(boardToString(result.board))
   console.log("========================\n")
+}
+
+export const test4 = () => {
+  const cells = [
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+  ]
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
+
+  const result = SudokuSolver.solveBoard(board)
+
+  console.log(boardToString(result.board))
 }
 
 test3()

@@ -1,10 +1,10 @@
-import { addNumber, createSolverInfo, fillBoardPrivate, solveBoard } from "../src/Solver"
+import { addNumber, createBoard, createSolverState, solveBoard } from "../src/solver"
 import * as Sudoku from "../src/Sudoku"
-import { boardToString, buildBoardCells, cellsToString } from "./helpers"
+import { buildBoardCells } from "./helpers"
 
 describe("Fills a board", () => {
   it("adds a number to a board", () => {
-    const solverInfo = createSolverInfo(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
+    const solverInfo = createSolverState(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
 
     const result = addNumber(solverInfo)(3, { row: 3, col: 2 })
 
@@ -29,7 +29,7 @@ describe("Fills a board", () => {
   })
 
   it("2 x 2", () => {
-    const result = fillBoardPrivate({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
+    const result = createBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
 
     // prettier-ignore
     const expected = [
@@ -62,7 +62,7 @@ describe("Solves a board", () => {
     expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
   })
 
-  it("3 x 3", () => {
+  it("3 x 3 in less then 600ms", () => {
     // prettier-ignore
     const cells = [
       ".......2.",
@@ -78,7 +78,9 @@ describe("Solves a board", () => {
     ]
     const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
 
+    const t1 = Date.now()
     const result = solveBoard(board)
+    const t2 = Date.now()
 
     // prettier-ignore
     const expectedCells = [
@@ -94,5 +96,6 @@ describe("Solves a board", () => {
     ]
 
     expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
+    expect(t2 - t1).toBeLessThan(600)
   })
 })

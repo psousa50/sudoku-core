@@ -1,5 +1,5 @@
 import { range } from "ramda"
-import { addNumber, cellGroup, createBoard, getEmptyCellPos } from "../src/Sudoku"
+import { addNumber, constrainedCells, createBoard, getFirstEmptyCellPos } from "../src/Sudoku"
 import { buildBoardCells } from "./helpers"
 
 it("Creates a new Board", () => {
@@ -61,12 +61,12 @@ it("getEmptyCellPos", () => {
 
   const board = cells.reduce((b, cell, i) => addNumber(b)(i, cell), initialBoard)
 
-  expect(getEmptyCellPos(board)).toEqual({ row: 1, col: 2 })
+  expect(getFirstEmptyCellPos(board)).toEqual({ row: 1, col: 2 })
 })
 
 it("returns cell Sudoku groups", () => {
   const board = createBoard({ boxWidth: 3, boxHeight: 3 })
-  const result = cellGroup(board)({ row: 1, col: 3 })
+  const result = constrainedCells(board)({ row: 1, col: 3 })
 
   const expectedCells = [
     [1, 0],

@@ -55,7 +55,7 @@ export const clearCell = (board: Board) => (cellPos: CellPos) => {
   }
 }
 
-export const cellGroup = (board: Board) => (cellPos: CellPos) => {
+export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
   const nc = numberCount(board)
   const boxRow = Math.floor(cellPos.row / board.boxHeight) * board.boxHeight
   const boxCol = Math.floor(cellPos.col / board.boxWidth) * board.boxWidth
@@ -75,7 +75,7 @@ export const cellGroup = (board: Board) => (cellPos: CellPos) => {
   return cells.filter((c, i) => cells.findIndex((c1) => c1.row === c.row && c1.col === c.col) === i)
 }
 
-export function* boardIterator(board: Board) {
+function* boardIterator(board: Board) {
   const nc = numberCount(board)
   for (let row = 0; row < nc; row++) {
     for (let col = 0; col < nc; col++) {
@@ -84,7 +84,7 @@ export function* boardIterator(board: Board) {
   }
 }
 
-export function boardCellsPos(board: Board) {
+export const allCellsPos = (board: Board) => {
   const nc = numberCount(board)
   let cellsPos = [] as CellPos[]
   for (let row = 0; row < nc; row++) {
@@ -96,13 +96,4 @@ export function boardCellsPos(board: Board) {
   return cellsPos
 }
 
-export const getEmptyCellPos = (board: Board): CellPos | undefined => {
-  const iter = boardIterator(board)
-  let result: CellPos | "not-found" | undefined
-  do {
-    const p = iter.next()
-    result = p.done ? "not-found" : cellIsEmpty(board)(p.value) ? p.value : undefined
-  } while (result === undefined)
-
-  return result === "not-found" ? undefined : result
-}
+export const getFirstEmptyCellPos = (board: Board): CellPos | undefined => allCellsPos(board).find(cellIsEmpty(board))

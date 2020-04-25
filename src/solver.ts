@@ -1,49 +1,60 @@
-import * as R from "ramda"
 import * as AvailableNumbers from "./AvailableNumbers"
+import { Constraints } from "./Constraints"
 import * as Sudoku from "./Sudoku"
+import { DeepPartial } from "./types"
 import { pow2, RandomGenerator, shuffleWith } from "./utils"
 
 // tslint:disable-next-line: no-empty-interface
-export interface FillBoardConfig extends Sudoku.BoardConfig {
-}
-
-export interface FillPrivateBoardConfig extends Sudoku.BoardConfig {
+export interface CreateBoardConfig extends Sudoku.BoardConfig {
   randomGenerator: RandomGenerator
+  constraints: Constraints
 }
 
-export interface SolveBoardPrivateConfig  {
+export interface SolverConfig {
   randomGenerator?: RandomGenerator
+  constraints: Constraints
 }
 
-interface SolverInfo {
+interface SolverState {
   board: Sudoku.Board
   availableNumbersMap: AvailableNumbers.AvailableNumbersMap
   filledCount: number
   result: "valid" | "invalid" | "impossible" | "unknown"
 }
 
-export const createSolverInfo = (board: Sudoku.Board): SolverInfo => {
+const defaultCreateBoardConfig: CreateBoardConfig = {
+  boxHeight: 3,
+  boxWidth: 3,
+  constraints: [],
+  randomGenerator: Math.random,
+}
+
+const defaultSolverConfig: SolverConfig = {
+  constraints: [],
+}
+
+export const createSolverState = (board: Sudoku.Board): SolverState => {
   const nc = Sudoku.numberCount(board)
   const allNumbersAvailable = pow2(nc) - 1
   const availableNumbersMap = AvailableNumbers.createAvailableNumbersMap(board, allNumbersAvailable)
-  const solverInfo: SolverInfo = {
+  const solverInfo: SolverState = {
     availableNumbersMap,
     board: Sudoku.createBoard(board),
     filledCount: 0,
     result: "unknown",
   }
 
-  return Sudoku.boardCellsPos(board).reduce((acc, cellPos) => {
+  return Sudoku.allCellsPos(board).reduce((acc, cellPos) => {
     const cell = Sudoku.cell(board)(cellPos)
     return cell === Sudoku.emptyCell ? acc : addNumber(acc)(cell, cellPos)
   }, solverInfo)
 }
 
-export const addNumber = (solverInfo: SolverInfo) => (n: number, cellPos: Sudoku.CellPos) => ({
+export const addNumber = (solverInfo: SolverState) => (n: number, cellPos: Sudoku.CellPos) => ({
   ...solverInfo,
   availableNumbersMap: AvailableNumbers.setUnavailable(solverInfo.availableNumbersMap)(
     n,
-    Sudoku.cellGroup(solverInfo.board)(cellPos),
+    Sudoku.constrainedCells(solverInfo.board)(cellPos),
   ),
   board: Sudoku.addNumber(solverInfo.board)(n, cellPos),
   filledCount: solverInfo.filledCount + 1,
@@ -57,11 +68,11 @@ const buildNumberListFromBitMask = (bitMask: number) => {
 }
 
 const tryNextAvailableNumber = (
-  solverInfo: SolverInfo,
-  config: SolveBoardPrivateConfig,
+  solverInfo: SolverState,
+  config: SolverConfig,
   availableNumbers: number[],
   emptyCellPos: Sudoku.CellPos,
-): SolverInfo => {
+): SolverState => {
 
   if (availableNumbers.length === 0) {
     return {
@@ -77,7 +88,7 @@ const tryNextAvailableNumber = (
     : tryNextAvailableNumber(solverInfo, config, availableNumbers.slice(1), emptyCellPos)
 }
 
-const fillEmptyCell = (solverInfo: SolverInfo, config: SolveBoardPrivateConfig, emptyCellPos: Sudoku.CellPos) => {
+const fillEmptyCell = (solverInfo: SolverState, config: SolverConfig, emptyCellPos: Sudoku.CellPos) => {
   const availableNumbersMask = solverInfo.availableNumbersMap[emptyCellPos.row][emptyCellPos.col]
   const list = buildNumberListFromBitMask(availableNumbersMask)
   const availableNumbers = config.randomGenerator ? shuffleWith(config.randomGenerator)(list) : list
@@ -85,8 +96,8 @@ const fillEmptyCell = (solverInfo: SolverInfo, config: SolveBoardPrivateConfig, 
   return tryNextAvailableNumber(solverInfo, config, availableNumbers, emptyCellPos)
 }
 
-const fillNextEmptyCell = (solverInfo: SolverInfo, config: SolveBoardPrivateConfig): SolverInfo => {
-  const emptyCellPos = Sudoku.getEmptyCellPos(solverInfo.board)
+const fillNextEmptyCell = (solverInfo: SolverState, config: SolverConfig): SolverState => {
+  const emptyCellPos = Sudoku.getFirstEmptyCellPos(solverInfo.board)
 
   return emptyCellPos === undefined
     ? {
@@ -96,20 +107,19 @@ const fillNextEmptyCell = (solverInfo: SolverInfo, config: SolveBoardPrivateConf
     : fillEmptyCell(solverInfo, config, emptyCellPos)
 }
 
-export const fillBoard = (config: FillBoardConfig) => fillBoardPrivate({ ...config, randomGenerator: Math.random })
+export const createBoard = (config: DeepPartial<CreateBoardConfig> = {}) => {
+  const c = { ...defaultCreateBoardConfig, ...config }
+  const board = Sudoku.createBoard(c)
+  const solverInfo = createSolverState(board)
 
-export const fillBoardPrivate = (config: FillPrivateBoardConfig) => {
-  const privateConfig = { randomGenerator: Math.random, ...config }
-  const board = Sudoku.createBoard(privateConfig)
-  const solverInfo = createSolverInfo(board)
-
-  const result = fillNextEmptyCell(solverInfo, privateConfig)
+  const result = fillNextEmptyCell(solverInfo, c)
 
   return result.board
 }
 
-export const solveBoard = (board: Sudoku.Board) => {
-  const solverInfo = createSolverInfo(board)
+export const solveBoard = (board: Sudoku.Board, config: DeepPartial<SolverConfig> = {}) => {
+  const c = { ...defaultSolverConfig, ...config }
+  const solverInfo = createSolverState(board)
 
-  return fillNextEmptyCell(solverInfo, {})
+  return fillNextEmptyCell(solverInfo, c)
 }
