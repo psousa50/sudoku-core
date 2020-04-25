@@ -25,8 +25,45 @@ export const boxConstraint: Constraint = (board) => (cellPos) => {
   )
 }
 
+export const diagonalConstraint: Constraint = (board) => (cellPos) => {
+  const nc = Sudoku.numberCount(board)
+  const d1 = cellPos.row === cellPos.col ? new Array(nc).fill(undefined).map((_, i) => ({ row: i, col: i })) : []
+  const d2 =
+    cellPos.row === nc - cellPos.col ? new Array(nc).fill(undefined).map((_, i) => ({ row: i, col: nc - i })) : []
+
+  return [...d1, ...d2]
+}
+
+const knightMoves = [
+  [-2, -1],
+  [-2, +1],
+  [-1, -2],
+  [-1, +2],
+  [+1, -2],
+  [+1, +2],
+  [+2, -1],
+  [+2, +1],
+]
+
+const addMove = (cellPos: Sudoku.CellPos) => (move: number[]) => ({
+  col: cellPos.col + move[1],
+  row: cellPos.row + move[0],
+})
+
+const cellIsValid = (board: Sudoku.Board) => (cellPos: Sudoku.CellPos) => {
+  const nc = Sudoku.numberCount(board)
+  return cellPos.row >= 0 && cellPos.row < nc && cellPos.col >= 0 && cellPos.col < nc
+}
+
+export const knightMoveConstraint: Constraint = board => cellPos => {
+    const validCell = cellIsValid(board)
+    const addToCell = addMove(cellPos)
+    return knightMoves.map(addToCell).filter(validCell)
+  }
+
 export const classicalConstraints: Constraints = [rowConstraint, colConstraint, boxConstraint]
 
 export const build = (constraints: Constraints) => (board: Sudoku.Board) => (cellPos: Sudoku.CellPos) =>
-  constraints.reduce((acc, constraint) => [...acc, ...constraint(board)(cellPos)], [] as Sudoku.CellPos[])
-  .filter((c, i, cells) => cells.findIndex(Sudoku.cellPosIsEqual(c)) === i)
+  constraints
+    .reduce((acc, constraint) => [...acc, ...constraint(board)(cellPos)], [] as Sudoku.CellPos[])
+    .filter((c, i, cells) => cells.findIndex(Sudoku.cellPosIsEqual(c)) === i)

@@ -1,9 +1,9 @@
-import * as R from "ramda"
 import random from "random"
 import seedrandom from "seedrandom"
+import * as Constraints from "../src/Constraints"
 import * as SudokuSolver from "../src/Solver"
 import * as Sudoku from "../src/Sudoku"
-import { rnd0ToMaxExclusive, shuffle, shuffleWith } from "../src/utils"
+import { shuffleWith } from "../src/utils"
 import { boardToString, buildBoardCells } from "./helpers"
 
 export const test1 = () => {
@@ -51,7 +51,6 @@ export const test2 = () => {
 }
 
 export const test3 = () => {
-
   random.use(seedrandom("1"))
   const randomGenerator = () => random.float()
 
@@ -74,18 +73,37 @@ export const test4 = () => {
     ".........",
     ".........",
     ".........",
+    "384......",
     ".........",
     ".........",
     ".........",
     ".........",
-    ".........",
-    ".........",
+    "........2",
   ]
-  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
+
+  const constraints = [
+    ...Constraints.classicalConstraints,
+    Constraints.diagonalConstraint,
+    Constraints.knightMoveConstraint,
+  ]
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3, constraints }, buildBoardCells(cells))
 
   const result = SudokuSolver.solveBoard(board)
 
   console.log(boardToString(result.board))
 }
 
-test3()
+export const test5 = () => {
+  const constraints = [
+    ...Constraints.classicalConstraints,
+    Constraints.diagonalConstraint,
+    Constraints.knightMoveConstraint,
+  ]
+  const result = SudokuSolver.createBoard({ boxWidth: 2, boxHeight: 2, constraints })
+
+  console.log(boardToString(result))
+}
+
+// test5()
+
+console.log(27, "[<10>;<20>H")

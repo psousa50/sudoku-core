@@ -23,7 +23,7 @@ describe("Fills a board", () => {
       [11, 11, 11, 11],
     ]
 
-    // expect(result.board.cells).toEqual(buildBoardCells(expectedBoard))
+    expect(result.board.cells).toEqual(buildBoardCells(expectedBoard))
     expect(result.filledCount).toEqual(1)
     expect(result.availableNumbersMap).toEqual(expectedAvailableNumbersMap)
   })

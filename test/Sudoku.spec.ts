@@ -1,4 +1,3 @@
-import { range } from "ramda"
 import { addNumber, constrainedCells, createBoard, getFirstEmptyCellPos } from "../src/Sudoku"
 import { buildBoardCells } from "./helpers"
 
