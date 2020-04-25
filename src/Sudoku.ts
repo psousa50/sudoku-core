@@ -1,4 +1,6 @@
 import * as R from "ramda"
+import * as Constraints from "./Constraints"
+import { DeepPartial } from "./types"
 
 export type EmptyCell = "."
 export type FilledCell = number
@@ -15,21 +17,33 @@ export const emptyCell: EmptyCell = "."
 export interface BoardConfig {
   boxWidth: number
   boxHeight: number
+  constraints: Constraints.Constraints
 }
 
 export interface Board extends BoardConfig {
   cells: Rows[]
 }
 
+const defaultBoardConfig = {
+  boxHeight: 3,
+  boxWidth: 3,
+  constraints: Constraints.classicalConstraints,
+}
+
 export const numberCount = (config: BoardConfig) => config.boxWidth * config.boxHeight
 
-export const createBoard = (config: BoardConfig, cells?: Rows[]): Board => {
-  const nc = numberCount(config)
+export const cellPosIsEqual = (cellPos1: CellPos) =>  (cellPos2: CellPos) =>
+  cellPos1.row === cellPos2.row && cellPos1.col === cellPos2.col
+
+export const createBoard = (config: DeepPartial<BoardConfig>, cells?: Rows[]): Board => {
+  const c = { ...defaultBoardConfig, ...config}
+  const nc = numberCount(c)
 
   return {
-    boxHeight: config.boxHeight,
-    boxWidth: config.boxWidth,
+    boxHeight: c.boxHeight,
+    boxWidth: c.boxWidth,
     cells: cells || new Array(nc).fill(undefined).map(() => new Array(nc).fill(emptyCell)),
+    constraints: c.constraints || Constraints.classicalConstraints,
   }
 }
 
@@ -73,15 +87,6 @@ export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
   ]
 
   return cells.filter((c, i) => cells.findIndex((c1) => c1.row === c.row && c1.col === c.col) === i)
-}
-
-function* boardIterator(board: Board) {
-  const nc = numberCount(board)
-  for (let row = 0; row < nc; row++) {
-    for (let col = 0; col < nc; col++) {
-      yield { row, col }
-    }
-  }
 }
 
 export const allCellsPos = (board: Board) => {

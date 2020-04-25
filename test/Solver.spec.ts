@@ -4,9 +4,9 @@ import { buildBoardCells } from "./helpers"
 
 describe("Fills a board", () => {
   it("adds a number to a board", () => {
-    const solverInfo = createSolverState(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
+    const solverState = createSolverState(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
 
-    const result = addNumber(solverInfo)(3, { row: 3, col: 2 })
+    const result = addNumber(solverState)(3, { row: 3, col: 2 })
 
     // prettier-ignore
     const expectedBoard = [
@@ -43,7 +43,7 @@ describe("Fills a board", () => {
 })
 
 describe("Solves a board", () => {
-  it("3 x 2", () => {
+  it("of 3 x 2", () => {
     // prettier-ignore
     const cells = [
       "4....1",
@@ -62,7 +62,7 @@ describe("Solves a board", () => {
     expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
   })
 
-  it("3 x 3 in less then 600ms", () => {
+  it("of 3 x 3 in less then 600ms", () => {
     // prettier-ignore
     const cells = [
       ".......2.",
