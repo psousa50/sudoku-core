@@ -46,6 +46,8 @@ export const test2 = () => {
   const result = SudokuSolver.solveBoard(board)
   const t2 = Date.now()
 
+  console.log(JSON.stringify(result, null, 2))
+
   console.log(boardToString(result.board))
   console.log(t2 - t1)
 }
@@ -96,14 +98,18 @@ export const test4 = () => {
 export const test5 = () => {
   const constraints = [
     ...Constraints.classicalConstraints,
-    Constraints.diagonalConstraint,
-    Constraints.knightMoveConstraint,
+    // Constraints.diagonalConstraint,
+    // Constraints.knightMoveConstraint,
   ]
-  const result = SudokuSolver.createBoard({ boxWidth: 2, boxHeight: 2, constraints })
+  const result = SudokuSolver.createBoardFull({ boxWidth: 3, boxHeight: 3, constraints })
 
-  console.log(boardToString(result))
+  console.log("filledCount", result.filledCount)
+  console.log("iterations", result.iterations)
+  console.log("solutions", result.solutions)
+
+  console.log()
+
+  console.log(boardToString(result.board))
 }
 
-// test5()
-
-console.log(27, "[<10>;<20>H")
+test5()

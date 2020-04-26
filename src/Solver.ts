@@ -4,34 +4,43 @@ import * as Sudoku from "./Sudoku"
 import { DeepPartial } from "./types"
 import { pow2, RandomGenerator, shuffleWith } from "./utils"
 
-export interface CreateBoardConfig extends Sudoku.BoardConfig {
-  randomGenerator: RandomGenerator
+export type SolverNotifications = (solverState: SolverState) => void
+
+export interface Config {
   constraints: Constraints.Constraints
-  useRandomCells: boolean
-}
-
-export interface SolverConfig {
+  notifications: SolverNotifications
   randomGenerator: RandomGenerator
   useRandomCells: boolean
 }
 
-interface SolverState {
+export interface CreateBoardConfig extends Sudoku.BoardConfig, Config {}
+
+export type SolverConfig = Config
+
+export interface SolverState {
   availableNumbersMap: AvailableNumbers.AvailableNumbersMap
   board: Sudoku.Board
   filledCount: number
+  iterations: number
+  solutions: number
   result: "valid" | "invalid" | "impossible" | "unknown"
 }
 
-const defaultCreateBoardConfig: CreateBoardConfig = {
-  boxHeight: 3,
-  boxWidth: 3,
+const defaultConfig: Config = {
   constraints: Constraints.classicalConstraints,
+  notifications: () => undefined,
   randomGenerator: Math.random,
   useRandomCells: true,
 }
 
+const defaultCreateBoardConfig: CreateBoardConfig = {
+  ...defaultConfig,
+  boxHeight: 3,
+  boxWidth: 3,
+}
+
 const defaultSolverConfig: SolverConfig = {
-  randomGenerator: Math.random,
+  ...defaultConfig,
   useRandomCells: false,
 }
 
@@ -43,7 +52,9 @@ export const createSolverState = (board: Sudoku.Board): SolverState => {
     availableNumbersMap,
     board: Sudoku.createBoard(board),
     filledCount: 0,
+    iterations: 0,
     result: "unknown",
+    solutions: 0,
   }
 
   return Sudoku.allCellsPos(board).reduce((acc, cellPos) => {
@@ -75,7 +86,6 @@ const tryNextAvailableNumber = (
   availableNumbers: number[],
   emptyCellPos: Sudoku.CellPos,
 ): SolverState => {
-
   if (availableNumbers.length === 0) {
     return {
       ...solverState,
@@ -99,25 +109,35 @@ const fillEmptyCell = (solverState: SolverState, config: SolverConfig, emptyCell
 }
 
 const fillboard = (solverState: SolverState, config: SolverConfig): SolverState => {
-  const emptyCellPos = Sudoku.getFirstEmptyCellPos(solverState.board)
+  const newSolverState = {
+    ...solverState,
+    iterations: solverState.iterations + 1,
+  }
+
+  const emptyCellPos = Sudoku.getFirstEmptyCellPos(newSolverState.board)
+
+  config.notifications(newSolverState)
 
   return emptyCellPos === undefined
     ? {
-        ...solverState,
+        ...newSolverState,
         result: "valid",
+        solutions: newSolverState.solutions + 1,
       }
-    : fillEmptyCell(solverState, config, emptyCellPos)
+    : fillEmptyCell(newSolverState, config, emptyCellPos)
 }
 
-export const createBoard = (config: DeepPartial<CreateBoardConfig> = {}) => {
+export const createBoardFull = (config: DeepPartial<CreateBoardConfig> = {}) => {
   const c = { ...defaultCreateBoardConfig, ...config }
   const board = Sudoku.createBoard(c)
   const solverState = createSolverState(board)
 
   const result = fillboard(solverState, c)
 
-  return result.board
+  return result
 }
+
+export const createBoard = (config: DeepPartial<CreateBoardConfig> = {}) => createBoardFull(config).board
 
 export const solveBoard = (board: Sudoku.Board, config: DeepPartial<SolverConfig> = {}) => {
   const c = { ...defaultSolverConfig, ...config }
