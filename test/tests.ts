@@ -101,15 +101,16 @@ export const test5 = () => {
     // Constraints.diagonalConstraint,
     // Constraints.knightMoveConstraint,
   ]
-  const result = SudokuSolver.createBoardFull({ boxWidth: 3, boxHeight: 3, constraints })
+  const result = SudokuSolver.createBoardFull({ boxWidth: 4, boxHeight: 4, constraints })
+
+  console.log(boardToString(result.board))
+
+  console.log()
 
   console.log("filledCount", result.filledCount)
   console.log("iterations", result.iterations)
   console.log("solutions", result.solutions)
 
-  console.log()
-
-  console.log(boardToString(result.board))
 }
 
 test5()

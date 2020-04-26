@@ -86,18 +86,24 @@ const tryNextAvailableNumber = (
   availableNumbers: number[],
   emptyCellPos: Sudoku.CellPos,
 ): SolverState => {
+
+  const nextSolverState = {
+    ...solverState,
+    iterations: solverState.iterations + 1,
+  }
+
   if (availableNumbers.length === 0) {
     return {
-      ...solverState,
+      ...nextSolverState,
       result: "invalid",
     }
   }
 
-  const newSolverState = fillboard(addNumber(solverState)(availableNumbers[0], emptyCellPos), config)
+  const filledSolverState = fillboard(addNumber(nextSolverState)(availableNumbers[0], emptyCellPos), config)
 
-  return newSolverState.result === "valid"
-    ? newSolverState
-    : tryNextAvailableNumber(solverState, config, availableNumbers.slice(1), emptyCellPos)
+  return filledSolverState.result === "valid"
+    ? filledSolverState
+    : tryNextAvailableNumber(nextSolverState, config, availableNumbers.slice(1), emptyCellPos)
 }
 
 const fillEmptyCell = (solverState: SolverState, config: SolverConfig, emptyCellPos: Sudoku.CellPos) => {
@@ -109,22 +115,18 @@ const fillEmptyCell = (solverState: SolverState, config: SolverConfig, emptyCell
 }
 
 const fillboard = (solverState: SolverState, config: SolverConfig): SolverState => {
-  const newSolverState = {
-    ...solverState,
-    iterations: solverState.iterations + 1,
-  }
 
-  const emptyCellPos = Sudoku.getFirstEmptyCellPos(newSolverState.board)
+  const emptyCellPos = Sudoku.getFirstEmptyCellPos(solverState.board)
 
-  config.notifications(newSolverState)
+  config.notifications(solverState)
 
   return emptyCellPos === undefined
     ? {
-        ...newSolverState,
+        ...solverState,
         result: "valid",
-        solutions: newSolverState.solutions + 1,
+        solutions: solverState.solutions + 1,
       }
-    : fillEmptyCell(newSolverState, config, emptyCellPos)
+    : fillEmptyCell(solverState, config, emptyCellPos)
 }
 
 export const createBoardFull = (config: DeepPartial<CreateBoardConfig> = {}) => {
