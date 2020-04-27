@@ -1,1 +1,1 @@
-export { Constraints, ConstraintsModels, helpers, Solver, SolverModels, Sudoku, SudokuModels, utils } from "./internal"
+export { Constraints, helpers, Solver, SolverModels, Sudoku, SudokuModels, utils } from "./internal"

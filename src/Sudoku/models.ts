@@ -1,4 +1,4 @@
-import { ConstraintsModels } from "../internal"
+import { Constraints } from "../internal"
 
 export type EmptyCell = "."
 export type FilledCell = number
@@ -15,7 +15,7 @@ export const emptyCell: EmptyCell = "."
 export interface BoardConfig {
   boxWidth: number
   boxHeight: number
-  constraints: ConstraintsModels.Constraints
+  constraints: Constraints.Constraints
 }
 
 export interface Board extends BoardConfig {

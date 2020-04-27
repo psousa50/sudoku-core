@@ -1,7 +1,9 @@
-import { AvailableNumbers, ConstraintsModels, SudokuModels, utils } from "../internal"
+import { AvailableNumbers, Constraints, SudokuModels, utils } from "../internal"
+
 export type SolverNotifications = (solverState: SolverState) => void
+
 export interface Config {
-  constraints: ConstraintsModels.Constraints
+  constraints: Constraints.Constraints
   notifications: SolverNotifications
   randomGenerator: utils.RandomGenerator
   useRandomCells: boolean

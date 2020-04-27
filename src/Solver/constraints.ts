@@ -1,6 +1,8 @@
 import * as R from "ramda"
 import { SudokuModels } from "../internal"
-import { Constraint, Constraints } from "./models"
+
+export type Constraint = (board: SudokuModels.Board) => (cellPos: SudokuModels.CellPos) => SudokuModels.CellPos[]
+export type Constraints = Constraint[]
 
 export const rowConstraint: Constraint = (board) => (cellPos) => {
   const nc = SudokuModels.numberCount(board)
