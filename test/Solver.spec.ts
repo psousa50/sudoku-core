@@ -1,33 +1,8 @@
-import { addNumber, createBoard, createSolverState, solveBoard } from "../src/Solver"
+import { createBoard, solveBoard } from "../src/Solver"
 import * as Sudoku from "../src/Sudoku"
 import { buildBoardCells } from "./helpers"
 
 describe("Fills a board", () => {
-  it("adds a number to a board", () => {
-    const solverState = createSolverState(Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 }))
-
-    const result = addNumber(solverState)(3, { row: 3, col: 2 })
-
-    // prettier-ignore
-    const expectedBoard = [
-      "....",
-      "....",
-      "....",
-      "..3.",
-    ]
-
-    const expectedAvailableNumbersMap = [
-      [15, 15, 11, 15],
-      [15, 15, 11, 15],
-      [15, 15, 11, 11],
-      [11, 11, 11, 11],
-    ]
-
-    expect(result.board.cells).toEqual(buildBoardCells(expectedBoard))
-    expect(result.filledCount).toEqual(1)
-    expect(result.availableNumbersMap).toEqual(expectedAvailableNumbersMap)
-  })
-
   it("2 x 2", () => {
     const result = createBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
 
@@ -38,7 +13,7 @@ describe("Fills a board", () => {
       "2143",
       "4321"]
 
-    expect(result.cells).toEqual(buildBoardCells(expected))
+    expect(result.board.cells).toEqual(buildBoardCells(expected))
   })
 })
 
@@ -74,7 +49,6 @@ describe("Solves a board", () => {
       "...53.8..",
       "8..2...6.",
       ".1.......",
-      "",
     ]
     const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
 
@@ -96,6 +70,6 @@ describe("Solves a board", () => {
     ]
 
     expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
-    expect(t2 - t1).toBeLessThan(600)
+    expect(t2 - t1).toBeLessThan(800)
   })
 })

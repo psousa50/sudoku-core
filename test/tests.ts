@@ -25,21 +25,21 @@ export const test1 = () => {
   const t1 = Date.now()
   console.log(boardToString(result.board))
   const t2 = Date.now()
-  console.log("=====>\n", t2 - t1)
+  console.log(t2 - t1)
 }
 
 export const test2 = () => {
   const cells = [
-    ".4...6.3.",
-    "7...4...1",
-    "...8..9..",
-    "..1.....8",
-    ".2..3..6.",
-    "3.....1..",
-    "..7..4...",
-    "1...8...7",
-    ".6.3...2.",
-  ]
+    ".......2.",
+    ".3...9..6",
+    "..1.47...",
+    "...1..47.",
+    "..5...3..",
+    ".27..8...",
+    "...53.8..",
+    "8..2...6.",
+    ".1.......",
+]
   const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
 
   const t1 = Date.now()
@@ -57,11 +57,11 @@ export const test3 = () => {
   const randomGenerator = () => random.float()
 
   const validBoard = SudokuSolver.createBoard({ boxWidth: 3, boxHeight: 3, randomGenerator })
-  console.log(boardToString(validBoard))
+  console.log(boardToString(validBoard.board))
   console.log("========================\n")
 
-  const cellsToRemove = shuffleWith(randomGenerator)(Sudoku.allCellsPos(validBoard)).slice(1)
-  const puzzle = cellsToRemove.reduce((acc, cell) => Sudoku.clearCell(acc)(cell), validBoard)
+  const cellsToRemove = shuffleWith(randomGenerator)(Sudoku.allCellsPos(validBoard.board)).slice(1)
+  const puzzle = cellsToRemove.reduce((acc, cell) => Sudoku.clearCell(acc)(cell), validBoard.board)
   console.log(boardToString(puzzle))
   console.log("========================\n")
 
@@ -75,10 +75,10 @@ export const test4 = () => {
     ".........",
     ".........",
     ".........",
-    "384......",
-    ".........",
-    ".........",
-    ".........",
+    "384672...",
+    "...159...",
+    "...834...",
+  ".........",
     ".........",
     "........2",
   ]
@@ -101,7 +101,7 @@ export const test5 = () => {
     // Constraints.diagonalConstraint,
     // Constraints.knightMoveConstraint,
   ]
-  const result = SudokuSolver.createBoardFull({ boxWidth: 4, boxHeight: 4, constraints })
+  const result = SudokuSolver.createBoard({ boxWidth: 3, boxHeight: 3, constraints })
 
   console.log(boardToString(result.board))
 
@@ -113,4 +113,4 @@ export const test5 = () => {
 
 }
 
-test5()
+test4()
