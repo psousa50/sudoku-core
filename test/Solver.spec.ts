@@ -1,10 +1,8 @@
-import { createBoard, solveBoard } from "../src/Solver"
-import * as Sudoku from "../src/Sudoku"
-import { buildBoardCells } from "./helpers"
+import { helpers, Solver, Sudoku } from "../src/internal"
 
 describe("Fills a board", () => {
   it("2 x 2", () => {
-    const result = createBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
+    const result = Solver.createBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
 
     // prettier-ignore
     const expected = [
@@ -13,7 +11,7 @@ describe("Fills a board", () => {
       "2143",
       "4321"]
 
-    expect(result.board.cells).toEqual(buildBoardCells(expected))
+    expect(result.board.cells).toEqual(helpers.buildBoardCells(expected))
   })
 })
 
@@ -28,13 +26,13 @@ describe("Solves a board", () => {
       "..54..",
       "1....5",
     ]
-    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 2 }, buildBoardCells(cells))
+    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 2 }, helpers.buildBoardCells(cells))
 
-    const result = solveBoard(board)
+    const result = Solver.solveBoard(board)
 
     const expectedCells = ["436251", "512364", "254136", "361542", "625413", "143625"]
 
-    expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
+    expect(result.board.cells).toEqual(helpers.buildBoardCells(expectedCells))
   })
 
   it("of 3 x 3 in less then 600ms", () => {
@@ -50,10 +48,10 @@ describe("Solves a board", () => {
       "8..2...6.",
       ".1.......",
     ]
-    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
+    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
 
     const t1 = Date.now()
-    const result = solveBoard(board)
+    const result = Solver.solveBoard(board)
     const t2 = Date.now()
 
     // prettier-ignore
@@ -69,7 +67,7 @@ describe("Solves a board", () => {
       "713986245",
     ]
 
-    expect(result.board.cells).toEqual(buildBoardCells(expectedCells))
+    expect(result.board.cells).toEqual(helpers.buildBoardCells(expectedCells))
     expect(t2 - t1).toBeLessThan(800)
   })
 })

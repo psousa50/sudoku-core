@@ -1,43 +1,16 @@
 import * as R from "ramda"
-import * as Constraints from "./Constraints"
-import { DeepPartial } from "./types"
+import { Constraints, SudokuModels, types } from "../internal"
+import { Board, BoardConfig, Cell, CellPos, emptyCell, Rows } from "./models"
 
-export type EmptyCell = "."
-export type FilledCell = number
-export type Cell = FilledCell | EmptyCell
-export type Rows = Cell[]
-
-export interface CellPos {
-  row: number
-  col: number
-}
-
-export const emptyCell: EmptyCell = "."
-
-export interface BoardConfig {
-  boxWidth: number
-  boxHeight: number
-  constraints: Constraints.Constraints
-}
-
-export interface Board extends BoardConfig {
-  cells: Rows[]
-}
-
-const defaultBoardConfig = {
+export const defaultBoardConfig = {
   boxHeight: 3,
   boxWidth: 3,
   constraints: Constraints.classicalConstraints,
 }
 
-export const numberCount = (config: BoardConfig) => config.boxWidth * config.boxHeight
-
-export const cellPosIsEqual = (cellPos1: CellPos) =>  (cellPos2: CellPos) =>
-  cellPos1.row === cellPos2.row && cellPos1.col === cellPos2.col
-
-export const createBoard = (config: DeepPartial<BoardConfig>, cells?: Rows[]): Board => {
+export const createBoard = (config: types.DeepPartial<BoardConfig>, cells?: Rows[]): Board => {
   const c = { ...defaultBoardConfig, ...config}
-  const nc = numberCount(c)
+  const nc = SudokuModels.numberCount(c)
 
   return {
     boxHeight: c.boxHeight,
@@ -70,7 +43,7 @@ export const clearCell = (board: Board) => (cellPos: CellPos) => {
 }
 
 export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
-  const nc = numberCount(board)
+  const nc = SudokuModels.numberCount(board)
   const boxRow = Math.floor(cellPos.row / board.boxHeight) * board.boxHeight
   const boxCol = Math.floor(cellPos.col / board.boxWidth) * board.boxWidth
 
@@ -90,7 +63,7 @@ export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
 }
 
 export const allCellsPos = (board: Board) => {
-  const nc = numberCount(board)
+  const nc = SudokuModels.numberCount(board)
   let cellsPos = [] as CellPos[]
   for (let row = 0; row < nc; row++) {
     for (let col = 0; col < nc; col++) {

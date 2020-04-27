@@ -1,10 +1,6 @@
 import random from "random"
 import seedrandom from "seedrandom"
-import * as Constraints from "../src/Constraints"
-import * as SudokuSolver from "../src/Solver"
-import * as Sudoku from "../src/Sudoku"
-import { shuffleWith } from "../src/utils"
-import { boardToString, buildBoardCells } from "./helpers"
+import { Constraints, helpers, Solver as SudokuSolver, Sudoku, utils } from "../src/internal"
 
 export const test1 = () => {
   const cells = [
@@ -18,12 +14,12 @@ export const test1 = () => {
     "8..2...6.",
     ".1.......",
   ]
-  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
 
   const result = SudokuSolver.solveBoard(board)
 
   const t1 = Date.now()
-  console.log(boardToString(result.board))
+  console.log(helpers.boardToString(result.board))
   const t2 = Date.now()
   console.log(t2 - t1)
 }
@@ -40,15 +36,13 @@ export const test2 = () => {
     "8..2...6.",
     ".1.......",
 ]
-  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, buildBoardCells(cells))
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
 
   const t1 = Date.now()
   const result = SudokuSolver.solveBoard(board)
   const t2 = Date.now()
 
-  console.log(JSON.stringify(result, null, 2))
-
-  console.log(boardToString(result.board))
+  console.log(helpers.boardToString(result.board))
   console.log(t2 - t1)
 }
 
@@ -57,16 +51,16 @@ export const test3 = () => {
   const randomGenerator = () => random.float()
 
   const validBoard = SudokuSolver.createBoard({ boxWidth: 3, boxHeight: 3, randomGenerator })
-  console.log(boardToString(validBoard.board))
+  console.log(helpers.boardToString(validBoard.board))
   console.log("========================\n")
 
-  const cellsToRemove = shuffleWith(randomGenerator)(Sudoku.allCellsPos(validBoard.board)).slice(1)
+  const cellsToRemove = utils.shuffleWith(randomGenerator)(Sudoku.allCellsPos(validBoard.board)).slice(1)
   const puzzle = cellsToRemove.reduce((acc, cell) => Sudoku.clearCell(acc)(cell), validBoard.board)
-  console.log(boardToString(puzzle))
+  console.log(helpers.boardToString(puzzle))
   console.log("========================\n")
 
   const result = SudokuSolver.solveBoard(puzzle)
-  console.log(boardToString(result.board))
+  console.log(helpers.boardToString(result.board))
   console.log("========================\n")
 }
 
@@ -88,11 +82,11 @@ export const test4 = () => {
     Constraints.diagonalConstraint,
     Constraints.knightMoveConstraint,
   ]
-  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3, constraints }, buildBoardCells(cells))
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3, constraints }, helpers.buildBoardCells(cells))
 
   const result = SudokuSolver.solveBoard(board)
 
-  console.log(boardToString(result.board))
+  console.log(helpers.boardToString(result.board))
 }
 
 export const test5 = () => {
@@ -103,7 +97,7 @@ export const test5 = () => {
   ]
   const result = SudokuSolver.createBoard({ boxWidth: 3, boxHeight: 3, constraints })
 
-  console.log(boardToString(result.board))
+  console.log(helpers.boardToString(result.board))
 
   console.log()
 
@@ -113,4 +107,6 @@ export const test5 = () => {
 
 }
 
-test4()
+const x = Constraints.classicalConstraints
+
+console.log("=====>\n", x)

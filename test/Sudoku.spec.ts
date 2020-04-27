@@ -1,8 +1,7 @@
-import { addNumber, constrainedCells, createBoard, getFirstEmptyCellPos } from "../src/Sudoku"
-import { buildBoardCells } from "./helpers"
+import { helpers, Sudoku } from "../src/internal"
 
 it("Creates a new Board", () => {
-  const result = createBoard({ boxWidth: 2, boxHeight: 1 })
+  const result = Sudoku.createBoard({ boxWidth: 2, boxHeight: 1 })
 
   // prettier-ignore
   const expected = [
@@ -10,14 +9,14 @@ it("Creates a new Board", () => {
       "..",
   ]
 
-  expect(result.cells).toEqual(buildBoardCells(expected))
+  expect(result.cells).toEqual(helpers.buildBoardCells(expected))
 })
 
 describe("addNumber", () => {
   it("adds a number to a board", () => {
-    const board = createBoard({ boxWidth: 2, boxHeight: 2 })
+    const board = Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 })
 
-    const result = addNumber(board)(5, { row: 1, col: 3 })
+    const result = Sudoku.addNumber(board)(5, { row: 1, col: 3 })
 
     // prettier-ignore
     const expectedBoard = [
@@ -27,13 +26,13 @@ describe("addNumber", () => {
       "....",
     ]
 
-    expect(result.cells).toEqual(buildBoardCells(expectedBoard))
+    expect(result.cells).toEqual(helpers.buildBoardCells(expectedBoard))
   })
 
   it("is immutable", () => {
-    const board = createBoard({ boxWidth: 2, boxHeight: 2 })
+    const board = Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 })
 
-    addNumber(board)(5, { row: 1, col: 3 })
+    Sudoku.addNumber(board)(5, { row: 1, col: 3 })
 
     // prettier-ignore
     const expectedBoard = [
@@ -43,12 +42,12 @@ describe("addNumber", () => {
     "....",
   ]
 
-    expect(board.cells).toEqual(buildBoardCells(expectedBoard))
+    expect(board.cells).toEqual(helpers.buildBoardCells(expectedBoard))
   })
 })
 
 it("getEmptyCellPos", () => {
-  const initialBoard = createBoard({ boxWidth: 2, boxHeight: 2 })
+  const initialBoard = Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 })
   const cells = [
     [0, 0],
     [0, 1],
@@ -58,14 +57,14 @@ it("getEmptyCellPos", () => {
     [1, 1],
   ].map((c) => ({ row: c[0], col: c[1] }))
 
-  const board = cells.reduce((b, cell, i) => addNumber(b)(i, cell), initialBoard)
+  const board = cells.reduce((b, cell, i) => Sudoku.addNumber(b)(i, cell), initialBoard)
 
-  expect(getFirstEmptyCellPos(board)).toEqual({ row: 1, col: 2 })
+  expect(Sudoku.getFirstEmptyCellPos(board)).toEqual({ row: 1, col: 2 })
 })
 
 it("returns cell Sudoku groups", () => {
-  const board = createBoard({ boxWidth: 3, boxHeight: 3 })
-  const result = constrainedCells(board)({ row: 1, col: 3 })
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 })
+  const result = Sudoku.constrainedCells(board)({ row: 1, col: 3 })
 
   const expectedCells = [
     [1, 0],
