@@ -7,7 +7,7 @@ import * as SolverModels from "./Solver/models"
 import * as SudokuModels from "./Sudoku/models"
 
 import * as Constraints from "./Constraints/domain"
-import * as AvailableNumbers from "./Solver/availableNumbers2"
+import * as AvailableNumbers from "./Solver/availableNumbers"
 import * as Solver from "./Solver/domain"
 import * as Sudoku from "./Sudoku/domain"
 
