@@ -16,7 +16,6 @@ export const createBoard = (config: types.DeepPartial<BoardConfig>, cells?: Rows
     boxHeight: c.boxHeight,
     boxWidth: c.boxWidth,
     cells: cells || new Array(nc).fill(undefined).map(() => new Array(nc).fill(emptyCell)),
-    constraints: c.constraints || Constraints.classicalConstraints,
   }
 }
 

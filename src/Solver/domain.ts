@@ -42,7 +42,7 @@ export const createSolverState = (board: SudokuModels.Board, config: SolverConfi
   solutions: 0,
 })
 
-const buildAvailableNumbersMap = (board: SudokuModels.Board): AvailableNumbers.AvailableNumbersMap => {
+const buildAvailableNumbersMap = (board: SudokuModels.Board, config: Config): AvailableNumbers.AvailableNumbersMap => {
   const nc = SudokuModels.numberCount(board)
   const allNumbersAvailable = utils.pow2(nc) - 1
   const availableNumbersMap = AvailableNumbers.createAvailableNumbersMap(board, allNumbersAvailable)
@@ -51,7 +51,7 @@ const buildAvailableNumbersMap = (board: SudokuModels.Board): AvailableNumbers.A
     const cell = Sudoku.cell(board)(cellPos)
     return cell === SudokuModels.emptyCell
       ? acc
-      : AvailableNumbers.setUnavailable(acc)(cell, Constraints.build(board.constraints)(board)(cellPos))
+      : AvailableNumbers.setUnavailable(acc)(cell, Constraints.build(config.constraints)(board)(cellPos))
   }, availableNumbersMap)
 }
 
@@ -74,11 +74,11 @@ export const removeNumberFromBoard = (solverState: SolverState) => (cellPos: Sud
   filledCount: solverState.filledCount - 1,
 })
 
-export const setUnavailable = (availableNumbersMap: AvailableNumbers.AvailableNumbersMap) => (
+export const setUnavailable = (availableNumbersMap: AvailableNumbers.AvailableNumbersMap, config: Config) => (
   board: SudokuModels.Board,
   n: number,
   cellPos: SudokuModels.CellPos,
-) => AvailableNumbers.setUnavailable(availableNumbersMap)(n, Constraints.build(board.constraints)(board)(cellPos))
+) => AvailableNumbers.setUnavailable(availableNumbersMap)(n, Constraints.build(config.constraints)(board)(cellPos))
 
 export const addNode = (
   solverState: SolverState,
@@ -143,7 +143,7 @@ export const nextStep = (solverState: SolverState): SolverState => {
     const n = availableNumbers[availableNumbersPointer]
     return addNode(
       addNumberToBoard(incPointerOnLastNode(nextSolverState))(n, cellPos),
-      setUnavailable(availableNumbersMap)(nextSolverState.board, n, cellPos),
+      setUnavailable(availableNumbersMap, solverState.config)(nextSolverState.board, n, cellPos),
     )
   } else {
     return removeNode(removeNumberFromBoard(nextSolverState)(cellPos))
@@ -166,7 +166,7 @@ export const startCreateBoard = (config: types.DeepPartial<CreateBoardConfig> = 
   const board = Sudoku.createBoard(c)
   const solverState = createSolverState(board, c)
 
-  return addNode(solverState, buildAvailableNumbersMap(board))
+  return addNode(solverState, buildAvailableNumbersMap(board, c))
 }
 
 export const solveBoard = (board: SudokuModels.Board, config: types.DeepPartial<SolverConfig> = {}) =>
@@ -176,5 +176,5 @@ export const startSolveBoard = (board: SudokuModels.Board, config: types.DeepPar
   const c = { ...defaultSolverConfig, ...config }
   const solverState = createSolverState(board, c)
 
-  return addNode(solverState, buildAvailableNumbersMap(board))
+  return addNode(solverState, buildAvailableNumbersMap(board, c))
 }
