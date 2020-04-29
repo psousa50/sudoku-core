@@ -1,6 +1,5 @@
-import { Sudoku, SudokuModels, types, utils } from "../internal"
+import { Constraints, Sudoku, SudokuModels, types, utils } from "../internal"
 import * as AvailableNumbers from "./availableNumbers"
-import * as Constraints from "./constraints"
 import { Config, CreateBoardConfig, SolverConfig, SolverNode, SolverState } from "./models"
 
 const defaultConfig: Config = {

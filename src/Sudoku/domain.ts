@@ -1,6 +1,7 @@
 import * as R from "ramda"
-import { Constraints, SudokuModels, types } from "../internal"
-import { Board, BoardConfig, Cell, CellPos, emptyCell, Rows } from "./models"
+import { types } from "../internal"
+import * as Constraints from "./constraints"
+import { Board, BoardConfig, Cell, CellPos, emptyCell, numberCount, Rows } from "./models"
 
 export const defaultBoardConfig = {
   boxHeight: 3,
@@ -10,12 +11,13 @@ export const defaultBoardConfig = {
 
 export const createBoard = (config: types.DeepPartial<BoardConfig>, cells?: Rows[]): Board => {
   const c = { ...defaultBoardConfig, ...config}
-  const nc = SudokuModels.numberCount(c)
+  const nc = numberCount(c)
 
   return {
     boxHeight: c.boxHeight,
     boxWidth: c.boxWidth,
     cells: cells || new Array(nc).fill(undefined).map(() => new Array(nc).fill(emptyCell)),
+    constraints: c.constraints || Constraints.classicalConstraints,
   }
 }
 
@@ -42,7 +44,7 @@ export const clearCell = (board: Board) => (cellPos: CellPos) => {
 }
 
 export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
-  const nc = SudokuModels.numberCount(board)
+  const nc = numberCount(board)
   const boxRow = Math.floor(cellPos.row / board.boxHeight) * board.boxHeight
   const boxCol = Math.floor(cellPos.col / board.boxWidth) * board.boxWidth
 
@@ -62,7 +64,7 @@ export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
 }
 
 export const allCellsPos = (board: Board) => {
-  const nc = SudokuModels.numberCount(board)
+  const nc = numberCount(board)
   let cellsPos = [] as CellPos[]
   for (let row = 0; row < nc; row++) {
     for (let col = 0; col < nc; col++) {

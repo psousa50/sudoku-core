@@ -1,3 +1,5 @@
+import * as Constraints from "./constraints"
+
 export type EmptyCell = "."
 export type FilledCell = number
 export type Cell = FilledCell | EmptyCell
@@ -13,6 +15,7 @@ export const emptyCell: EmptyCell = "."
 export interface BoardConfig {
   boxWidth: number
   boxHeight: number
+  constraints: Constraints.Constraints
 }
 
 export interface Board extends BoardConfig {

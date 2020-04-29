@@ -1,5 +1,5 @@
 import * as R from "ramda"
-import { SudokuModels } from "../internal"
+import * as SudokuModels from "./models"
 
 export type Constraint = (board: SudokuModels.Board) => (cellPos: SudokuModels.CellPos) => SudokuModels.CellPos[]
 export type Constraints = Constraint[]
