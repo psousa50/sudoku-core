@@ -1,4 +1,4 @@
-import { helpers, Sudoku } from "../src/internal"
+import { helpers, Sudoku } from "../../src/internal"
 
 it("Creates a new Board", () => {
   const result = Sudoku.createBoard({ boxWidth: 2, boxHeight: 1 })

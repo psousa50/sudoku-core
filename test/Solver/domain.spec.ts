@@ -1,4 +1,4 @@
-import { helpers, Solver, Sudoku } from "../src/internal"
+import { helpers, Solver, Sudoku } from "../../src/internal"
 
 describe("Creates a board", () => {
   it("2 x 2", () => {
