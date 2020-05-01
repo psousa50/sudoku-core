@@ -1,3 +1,4 @@
+import * as R from "ramda"
 import { Constraints, Sudoku, SudokuModels, types, utils } from "../internal"
 import * as AvailableNumbers from "./availableNumbers"
 import { Config, CreateBoardConfig, SolverConfig, SolverNode, SolverState } from "./models"
@@ -54,7 +55,7 @@ const buildAvailableNumbersMap = (board: SudokuModels.Board, config: Config): Av
   }, availableNumbersMap)
 }
 
-const buildNumberListFromBitMask = (bitMask: number) => {
+export const buildNumberListFromBitMask = (bitMask: number) => {
   const buildList = (b: number, n: number, list: number[]): number[] =>
     b === 0 ? list : buildList(Math.floor(b / 2), n + 1, b % 2 === 0 ? list : [...list, n])
 
@@ -79,11 +80,23 @@ export const setUnavailable = (availableNumbersMap: AvailableNumbers.AvailableNu
   cellPos: SudokuModels.CellPos,
 ) => AvailableNumbers.setUnavailable(availableNumbersMap)(n, Constraints.build(config.constraints)(board)(cellPos))
 
+const getEmptyCellPos = (solverState: SolverState, availableNumbersMap: AvailableNumbers.AvailableNumbersMap) => {
+  const emptyCells = R.sort(
+    (nl1, nl2) => nl1.availableNumbers.length - nl2.availableNumbers.length,
+    Sudoku.allCellsPos(solverState.board)
+      .filter(Sudoku.cellIsEmpty(solverState.board))
+      .map(cell => ({ cell, availableNumbers: buildNumberListFromBitMask(availableNumbersMap[cell.row][cell.col]) })),
+  )
+
+  return emptyCells.length > 0 ? emptyCells[0].cell : undefined
+}
+
 export const addNode = (
   solverState: SolverState,
   availableNumbersMap: AvailableNumbers.AvailableNumbersMap,
 ): SolverState => {
-  const emptyCellPos = Sudoku.getFirstEmptyCellPos(solverState.board)
+  // const emptyCellPos = Sudoku.getFirstEmptyCellPos(solverState.board)
+  const emptyCellPos = getEmptyCellPos(solverState, availableNumbersMap)
 
   if (emptyCellPos) {
     const availableNumbersMask = availableNumbersMap[emptyCellPos.row][emptyCellPos.col]
@@ -172,7 +185,7 @@ export const solveBoard = (board: SudokuModels.Board, config: types.DeepPartial<
   fillboard(startSolveBoard(board, config))
 
 export const startSolveBoard = (board: SudokuModels.Board, config: types.DeepPartial<SolverConfig> = {}) => {
-  const c = { ...defaultSolverConfig, ...config }
+  const c = { ...defaultSolverConfig, ...board, ...config }
   const solverState = createSolverState(board, c)
 
   return addNode(solverState, buildAvailableNumbersMap(board, c))

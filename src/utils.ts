@@ -21,3 +21,8 @@ const pow2Map = R.range(0, 32).map((n) => Math.pow(2, n))
 export const pow2 = (n: number) => (n <= 32 ? pow2Map[n] : Math.pow(2, n))
 
 export const rnd0ToMaxExclusive = (max: number) => Math.floor(Math.random() * max)
+
+export const lj = (m: string, d: any) => {
+  console.log(m, ": ", JSON.stringify(d, null, 2))
+  return d
+}

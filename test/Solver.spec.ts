@@ -1,6 +1,6 @@
 import { helpers, Solver, Sudoku } from "../src/internal"
 
-describe("Fills a board", () => {
+describe("Creates a board", () => {
   it("2 x 2", () => {
     const result = Solver.createBoard({ boxWidth: 2, boxHeight: 2, randomGenerator: () => 0.9 })
 
@@ -33,6 +33,28 @@ describe("Solves a board", () => {
     const expectedCells = ["436251", "512364", "254136", "361542", "625413", "143625"]
 
     expect(result.board.cells).toEqual(helpers.buildBoardCells(expectedCells))
+  })
+
+  it("starting by the cell with less available numbers ", () => {
+    // prettier-ignore
+    const cells = [
+      ".8..47...",
+      "36.......",
+      "..7615..2",
+      "7.1......",
+      ".3.......",
+      "24.......",
+      ".........",
+      ".........",
+      ".........",
+  ]
+
+    const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
+
+    const r1 = Solver.startSolveBoard(board)
+    const result = Solver.nextStep(r1)
+
+    expect(Sudoku.cell(result.board)({row: 2, col: 1})).toBe(9)
   })
 
   it("of 3 x 3 in less then 600ms", () => {
@@ -68,6 +90,6 @@ describe("Solves a board", () => {
     ]
 
     expect(result.board.cells).toEqual(helpers.buildBoardCells(expectedCells))
-    expect(t2 - t1).toBeLessThan(800)
+    expect(t2 - t1).toBeLessThan(300)
   })
 })

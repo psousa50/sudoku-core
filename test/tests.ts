@@ -24,7 +24,7 @@ export const test1 = () => {
   console.log(t2 - t1)
 }
 
-export const test2 = () => {
+export const performance = () => {
   const cells = [
     ".......2.",
     ".3...9..6",
@@ -35,7 +35,7 @@ export const test2 = () => {
     "...53.8..",
     "8..2...6.",
     ".1.......",
-]
+  ]
   const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
 
   const t1 = Date.now()
@@ -43,6 +43,7 @@ export const test2 = () => {
   const t2 = Date.now()
 
   console.log(helpers.boardToString(result.board))
+  console.log(result.iterations)
   console.log(t2 - t1)
 }
 
@@ -72,7 +73,7 @@ export const test4 = () => {
     "384672...",
     "...159...",
     "...834...",
-  ".........",
+    ".........",
     ".........",
     "........2",
   ]
@@ -87,6 +88,9 @@ export const test4 = () => {
   const result = SudokuSolver.solveBoard(board)
 
   console.log(helpers.boardToString(result.board))
+  console.log(result.iterations)
+  console.log(result.solutions)
+  console.log(result.result)
 }
 
 export const test5 = () => {
@@ -104,9 +108,27 @@ export const test5 = () => {
   console.log("filledCount", result.filledCount)
   console.log("iterations", result.iterations)
   console.log("solutions", result.solutions)
-
 }
 
-const x = Constraints.classicalConstraints
+export const test6 = () => {
+  const cells = [
+    ".8..47...",
+    "36.......",
+    "..7615..2",
+    "7.1......",
+    ".3.......",
+    "24.......",
+    ".........",
+    ".........",
+    ".........",
+  ]
 
-console.log("=====>\n", x)
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
+  // const r1 = SudokuSolver.startSolveBoard(board)
+  const result = SudokuSolver.solveBoard(board)
+
+  console.log(helpers.boardToString(result.board))
+  console.log("=====>\n", result.iterations)
+}
+
+test4()
