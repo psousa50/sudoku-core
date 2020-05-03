@@ -1,5 +1,5 @@
 import * as R from "ramda"
-import { Constraints, Sudoku, SudokuModels, types, utils } from "../internal"
+import { Constraints, SolverModels, Sudoku, SudokuModels, types, utils } from "../internal"
 import * as AvailableNumbers from "./availableNumbers"
 import { Config, CreateBoardConfig, SolverConfig, SolverNode, SolverState } from "./models"
 
@@ -38,8 +38,23 @@ export const createSolverState = (board: SudokuModels.Board, config: SolverConfi
   filledCount: 0,
   iterations: 0,
   nodes: [],
-  result: "unknown",
+  outcome: SolverModels.Outcomes.unknown,
   solutions: 0,
+})
+
+const setOutcome = (solverState: SolverState) => (outcome: SolverModels.Outcomes) => ({
+  ...solverState,
+  outcome,
+})
+
+const incrementIterations = (solverState: SolverState) => ({
+  ...solverState,
+  iterations: solverState.iterations + 1,
+})
+
+const incrementSolutions = (solverState: SolverState) => ({
+  ...solverState,
+  solutions: solverState.solutions + 1,
 })
 
 const buildAvailableNumbersMap = (board: SudokuModels.Board, config: Config): AvailableNumbers.AvailableNumbersMap => {
@@ -109,11 +124,7 @@ export const addNode = (
       nodes: [...solverState.nodes, createSolverNode(emptyCellPos, availableNumbersMap, availableNumbers)],
     }
   } else {
-    return {
-      ...solverState,
-      result: "valid",
-      solutions: solverState.solutions + 1,
-    }
+    return incrementSolutions(setOutcome(solverState)(SolverModels.Outcomes.valid))
   }
 }
 
@@ -135,41 +146,48 @@ const incPointerOnLastNode = (solverState: SolverState) => ({
   ],
 })
 
-export const nextStep = (solverState: SolverState): SolverState => {
-  const nextSolverState = {
-    ...solverState,
-    iterations: solverState.iterations + 1,
-  }
-
-  if (nextSolverState.nodes.length === 0) {
-    return {
-      ...solverState,
-      result: "impossible",
-    }
-  }
-
-  const lastNode = nextSolverState.nodes[nextSolverState.nodes.length - 1]
+export const processLastNode = (solverState: SolverState): SolverState => {
+  const lastNode = solverState.nodes[solverState.nodes.length - 1]
   const { availableNumbers, availableNumbersMap, availableNumbersPointer, cellPos } = lastNode
 
   if (availableNumbersPointer < availableNumbers.length) {
     const n = availableNumbers[availableNumbersPointer]
     return addNode(
-      addNumberToBoard(incPointerOnLastNode(nextSolverState))(n, cellPos),
-      setUnavailable(availableNumbersMap, solverState.config)(nextSolverState.board, n, cellPos),
+      addNumberToBoard(incPointerOnLastNode(solverState))(n, cellPos),
+      setUnavailable(availableNumbersMap, solverState.config)(solverState.board, n, cellPos),
     )
   } else {
-    return removeNode(removeNumberFromBoard(nextSolverState)(cellPos))
+    return removeNode(removeNumberFromBoard(solverState)(cellPos))
   }
 }
 
-const fillboard = (solverState: SolverState): SolverState => {
-  let s = solverState
-  while (s.result === "unknown") {
-    s = nextStep(s)
-  }
+export const nextStep = (solverState: SolverState): SolverState =>
+  solverState.nodes.length === 0
+    ? setOutcome(solverState)(SolverModels.Outcomes.impossible)
+    : processLastNode(incrementIterations(solverState))
 
-  return s
+const decreasePointer = (solverState: SolverState): SolverState => {
+  const lastNode = solverState.nodes[solverState.nodes.length - 1]
+  const lastNodeDecreased = {
+    ...lastNode,
+    availableNumbersPointer: lastNode.availableNumbersPointer - 1,
+  }
+  return {
+    ...solverState,
+    nodes: [...solverState.nodes.slice(0, solverState.nodes.length - 1), lastNodeDecreased],
+  }
 }
+
+export const undoStep = (solverState: SolverState): SolverState => {
+  return solverState.nodes.length > 1
+    ? decreasePointer(
+        removeNode(removeNumberFromBoard(solverState)(solverState.nodes[solverState.nodes.length - 2].cellPos)),
+      )
+    : solverState
+}
+
+const fillboard = (solverState: SolverState): SolverState =>
+  solverState.outcome === SolverModels.Outcomes.unknown ? fillboard(nextStep(solverState)) : solverState
 
 export const createBoard = (config: types.DeepPartial<CreateBoardConfig> = {}) => fillboard(startCreateBoard(config))
 
