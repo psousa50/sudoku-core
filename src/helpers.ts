@@ -9,7 +9,8 @@ const toCell = (c: string) =>
 
 export const buildBoardCells = (rows: string[]) => rows.map(r => r.split("").map(toCell))
 
-const toString = (c: SudokuModels.Cell) => (c === SudokuModels.emptyCell ? "." : c.toString())
+const toString = (c: SudokuModels.Cell) =>
+  c === SudokuModels.emptyCell ? "." : c < 10 ? c.toString() : String.fromCharCode(c - 10 + "A".charCodeAt(0))
 
 export const cellsToString = (rows: SudokuModels.Rows[]) => rows.map(r => r.map(toString).join(""))
 

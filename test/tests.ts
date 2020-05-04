@@ -86,6 +86,7 @@ export const generatePuzzle = () => {
   const result = SudokuSolver.solveBoard(puzzle)
   console.log(helpers.boardToString(result.board))
   console.log("========================\n")
+
 }
 
 export const test4 = () => {
