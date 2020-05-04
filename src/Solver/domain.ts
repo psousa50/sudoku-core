@@ -186,8 +186,14 @@ export const undoStep = (solverState: SolverState): SolverState => {
     : solverState
 }
 
-const fillboard = (solverState: SolverState): SolverState =>
-  solverState.outcome === SolverModels.Outcomes.unknown ? fillboard(nextStep(solverState)) : solverState
+const fillboard = (solverState: SolverState): SolverState => {
+  let s = solverState
+  while (s.outcome === SolverModels.Outcomes.unknown) {
+    s = nextStep(s)
+  }
+
+  return s
+}
 
 export const createBoard = (config: types.DeepPartial<CreateBoardConfig> = {}) => fillboard(startCreateBoard(config))
 
