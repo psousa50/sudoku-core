@@ -1,4 +1,4 @@
-import { helpers, Solver, Sudoku } from "../../src/internal"
+import { helpers, Solver, SolverModels, Sudoku } from "../../src/internal"
 
 describe("Creates a board", () => {
   it("2 x 2", () => {
@@ -54,10 +54,10 @@ describe("Solves a board", () => {
     const r1 = Solver.startSolveBoard(board)
     const result = Solver.nextStep(r1)
 
-    expect(Sudoku.cell(result.board)({row: 2, col: 1})).toBe(9)
+    expect(Sudoku.cell(result.board)({ row: 2, col: 1 })).toBe(9)
   })
 
-  it("of 3 x 3 in less then 600ms", () => {
+  it("of 3 x 3 in less then 300ms", () => {
     // prettier-ignore
     const cells = [
       ".......2.",
@@ -93,3 +93,15 @@ describe("Solves a board", () => {
     expect(t2 - t1).toBeLessThan(300)
   })
 })
+
+// describe("findMinimalSolution", () => {
+//   it("finds a valid Sudoku puzzle", () => {
+
+//     const board = Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 })
+
+//     const result = Solver.createPuzzle(board)
+
+//     expect(result.solutions).toEqual(2)
+//     expect(result.outcome).toEqual(SolverModels.Outcomes.invalid)
+//   })
+// })

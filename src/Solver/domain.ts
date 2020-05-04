@@ -1,5 +1,7 @@
 import * as R from "ramda"
 import { Constraints, SolverModels, Sudoku, SudokuModels, types, utils } from "../internal"
+import { CellPos } from "../Sudoku/models"
+import { shuffle } from "../utils"
 import * as AvailableNumbers from "./availableNumbers"
 import { Config, CreateBoardConfig, SolverConfig, SolverNode, SolverState } from "./models"
 
@@ -106,16 +108,35 @@ const getEmptyCellPos = (solverState: SolverState, availableNumbersMap: Availabl
   return emptyCells.length > 0 ? emptyCells[0].cell : undefined
 }
 
+const byChanges = (cellsPos: CellPos[], availableNumbersMap: AvailableNumbers.AvailableNumbersMap) => (
+  n1: number,
+  n2: number,
+) => {
+
+  const countAvailableNumbersChanges = (n: number) => {
+    const np2 = utils.pow2(n)
+    // tslint:disable-next-line: no-bitwise
+    return cellsPos.map(c => availableNumbersMap[c.row][c.col]).filter(a => (a & np2) === np2).length
+  }
+
+  return countAvailableNumbersChanges(n2) - countAvailableNumbersChanges(n1)
+}
+
 export const addNode = (
   solverState: SolverState,
   availableNumbersMap: AvailableNumbers.AvailableNumbersMap,
 ): SolverState => {
-  // const emptyCellPos = Sudoku.getFirstEmptyCellPos(solverState.board)
   const emptyCellPos = getEmptyCellPos(solverState, availableNumbersMap)
 
   if (emptyCellPos) {
     const availableNumbersMask = availableNumbersMap[emptyCellPos.row][emptyCellPos.col]
-    const numbersList = buildNumberListFromBitMask(availableNumbersMask)
+    const numbersList = R.sort(
+      byChanges(
+        Constraints.build(solverState.config.constraints)(solverState.board)(emptyCellPos),
+        availableNumbersMap,
+      ),
+      buildNumberListFromBitMask(availableNumbersMask),
+    )
     const availableNumbers = solverState.config.useRandomCells
       ? utils.shuffleWith(solverState.config.randomGenerator)(numbersList)
       : numbersList

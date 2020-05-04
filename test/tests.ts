@@ -24,6 +24,28 @@ export const test1 = () => {
   console.log(t2 - t1)
 }
 
+export const solveInvalid = () => {
+  const cells = [
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+  ]
+  const board = Sudoku.createBoard({ boxWidth: 3, boxHeight: 3 }, helpers.buildBoardCells(cells))
+
+  const result = SudokuSolver.solveBoard(board)
+
+  console.log(helpers.boardToString(result.board))
+  console.log(result.iterations)
+  console.log(result.solutions)
+  console.log(result.outcome)
+}
+
 export const performance = () => {
   const cells = [
     ".......2.",
@@ -47,15 +69,16 @@ export const performance = () => {
   console.log(t2 - t1)
 }
 
-export const test3 = () => {
+export const generatePuzzle = () => {
   random.use(seedrandom("1"))
   const randomGenerator = () => random.float()
 
-  const validBoard = SudokuSolver.createBoard({ boxWidth: 3, boxHeight: 3, randomGenerator })
+  const validBoard = SudokuSolver.createBoard({ boxWidth: 4, boxHeight: 4, randomGenerator })
   console.log(helpers.boardToString(validBoard.board))
   console.log("========================\n")
 
-  const cellsToRemove = utils.shuffleWith(randomGenerator)(Sudoku.allCellsPos(validBoard.board)).slice(1)
+  const allCells = Sudoku.allCellsPos(validBoard.board)
+  const cellsToRemove = utils.shuffle(allCells).slice(0, Math.max(1, allCells.length * 0.4))
   const puzzle = cellsToRemove.reduce((acc, cell) => Sudoku.clearCell(acc)(cell), validBoard.board)
   console.log(helpers.boardToString(puzzle))
   console.log("========================\n")
@@ -155,7 +178,8 @@ export const medium4x4 = () => {
   const result = SudokuSolver.solveBoard(board)
 
   console.log(helpers.boardToString(result.board))
-  console.log("=====>", result.iterations)
+  console.log("iterations", result.iterations)
+  console.log("solutions", result.solutions)
 }
 
 export const hard4x4 = () => {
@@ -185,4 +209,4 @@ export const hard4x4 = () => {
   console.log("=====>", result.iterations)
 }
 
-medium4x4()
+generatePuzzle()
