@@ -1,9 +1,13 @@
 import * as R from "ramda"
 import { Constraints, SolverModels, Sudoku, SudokuModels, types, utils } from "../internal"
 import { CellPos } from "../Sudoku/models"
-import { shuffle } from "../utils"
 import * as AvailableNumbers from "./availableNumbers"
 import { Config, CreateBoardConfig, SolverConfig, SolverNode, SolverState } from "./models"
+
+type SolverAction = (solverState: SolverState) => SolverState
+
+export const act = (...actions: SolverAction[]): SolverAction => solverState =>
+  actions.reduce((acc, action) => action(acc), solverState)
 
 const defaultConfig: Config = {
   constraints: Constraints.classicalConstraints,
@@ -44,17 +48,17 @@ export const createSolverState = (board: SudokuModels.Board, config: SolverConfi
   solutions: 0,
 })
 
-const setOutcome = (solverState: SolverState) => (outcome: SolverModels.Outcomes) => ({
+const setOutcome = (outcome: SolverModels.Outcomes): SolverAction => solverState => ({
   ...solverState,
   outcome,
 })
 
-const incrementIterations = (solverState: SolverState) => ({
+const incrementIterations: SolverAction = solverState => ({
   ...solverState,
   iterations: solverState.iterations + 1,
 })
 
-const incrementSolutions = (solverState: SolverState) => ({
+const incrementSolutions: SolverAction = solverState => ({
   ...solverState,
   solutions: solverState.solutions + 1,
 })
@@ -79,13 +83,18 @@ export const buildNumberListFromBitMask = (bitMask: number) => {
   return buildList(bitMask, 1, [])
 }
 
-export const addNumberToBoard = (solverState: SolverState) => (n: number, cellPos: SudokuModels.CellPos) => ({
+export const addNumberToBoard = (n: number, cellPos: SudokuModels.CellPos): SolverAction => solverState => ({
   ...solverState,
   board: Sudoku.addNumber(solverState.board)(n, cellPos),
   filledCount: solverState.filledCount + 1,
 })
 
-export const removeNumberFromBoard = (solverState: SolverState) => (cellPos: SudokuModels.CellPos) => ({
+export const addNodeToState = (node: SolverModels.SolverNode): SolverAction => solverState => ({
+  ...solverState,
+  nodes: [...solverState.nodes, node],
+})
+
+export const removeNumberFromBoard = (cellPos: SudokuModels.CellPos): SolverAction => solverState => ({
   ...solverState,
   board: Sudoku.clearCell(solverState.board)(cellPos),
   filledCount: solverState.filledCount - 1,
@@ -112,7 +121,6 @@ const byChanges = (cellsPos: CellPos[], availableNumbersMap: AvailableNumbers.Av
   n1: number,
   n2: number,
 ) => {
-
   const countAvailableNumbersChanges = (n: number) => {
     const np2 = utils.pow2(n)
     // tslint:disable-next-line: no-bitwise
@@ -122,72 +130,78 @@ const byChanges = (cellsPos: CellPos[], availableNumbersMap: AvailableNumbers.Av
   return countAvailableNumbersChanges(n2) - countAvailableNumbersChanges(n1)
 }
 
-export const addNode = (
-  solverState: SolverState,
+const getCellAvailableNumbers = (
+  cellPos: CellPos,
   availableNumbersMap: AvailableNumbers.AvailableNumbersMap,
-): SolverState => {
-  const emptyCellPos = getEmptyCellPos(solverState, availableNumbersMap)
+  solverState: SolverState,
+) => {
+  const availableNumbersMask = availableNumbersMap[cellPos.row][cellPos.col]
+  const numbersList = R.sort(
+    byChanges(Constraints.build(solverState.config.constraints)(solverState.board)(cellPos), availableNumbersMap),
+    buildNumberListFromBitMask(availableNumbersMask),
+  )
+  const availableNumbers = solverState.config.useRandomCells
+    ? utils.shuffleWith(solverState.config.randomGenerator)(numbersList)
+    : numbersList
 
-  if (emptyCellPos) {
-    const availableNumbersMask = availableNumbersMap[emptyCellPos.row][emptyCellPos.col]
-    const numbersList = R.sort(
-      byChanges(
-        Constraints.build(solverState.config.constraints)(solverState.board)(emptyCellPos),
-        availableNumbersMap,
-      ),
-      buildNumberListFromBitMask(availableNumbersMask),
-    )
-    const availableNumbers = solverState.config.useRandomCells
-      ? utils.shuffleWith(solverState.config.randomGenerator)(numbersList)
-      : numbersList
-    return {
-      ...solverState,
-      nodes: [...solverState.nodes, createSolverNode(emptyCellPos, availableNumbersMap, availableNumbers)],
-    }
-  } else {
-    return incrementSolutions(setOutcome(solverState)(SolverModels.Outcomes.valid))
-  }
+  return availableNumbers
 }
 
-const removeNode = (solverState: SolverState) => ({
+export const addNode = (availableNumbersMap: AvailableNumbers.AvailableNumbersMap): SolverAction => solverState => {
+  const emptyCellPos = getEmptyCellPos(solverState, availableNumbersMap)
+
+  return emptyCellPos
+    ? addNodeToState(
+        createSolverNode(
+          emptyCellPos,
+          availableNumbersMap,
+          getCellAvailableNumbers(emptyCellPos, availableNumbersMap, solverState),
+        ),
+      )(solverState)
+    : act(setOutcome(SolverModels.Outcomes.valid), incrementSolutions)(solverState)
+}
+
+const removeNode: SolverAction = solverState => ({
   ...solverState,
   nodes: solverState.nodes.slice(0, solverState.nodes.length - 1),
 })
 
-const incAvailablleNumbersPointer = (node: SolverNode) => ({
+const incAvailableNumbersPointer = (node: SolverNode) => ({
   ...node,
   availableNumbersPointer: node.availableNumbersPointer + 1,
 })
 
-const incPointerOnLastNode = (solverState: SolverState) => ({
+const incPointerOnLastNode: SolverAction = solverState => ({
   ...solverState,
   nodes: [
     ...solverState.nodes.slice(0, solverState.nodes.length - 1),
-    incAvailablleNumbersPointer(solverState.nodes[solverState.nodes.length - 1]),
+    incAvailableNumbersPointer(solverState.nodes[solverState.nodes.length - 1]),
   ],
 })
 
-export const processLastNode = (solverState: SolverState): SolverState => {
+export const processLastNode: SolverAction = solverState => {
   const lastNode = solverState.nodes[solverState.nodes.length - 1]
   const { availableNumbers, availableNumbersMap, availableNumbersPointer, cellPos } = lastNode
 
   if (availableNumbersPointer < availableNumbers.length) {
     const n = availableNumbers[availableNumbersPointer]
-    return addNode(
-      addNumberToBoard(incPointerOnLastNode(solverState))(n, cellPos),
-      setUnavailable(availableNumbersMap, solverState.config)(solverState.board, n, cellPos),
-    )
+
+    return act(
+      addNumberToBoard(n, cellPos),
+      incPointerOnLastNode,
+      addNode(setUnavailable(availableNumbersMap, solverState.config)(solverState.board, n, cellPos)),
+    )(solverState)
   } else {
-    return removeNode(removeNumberFromBoard(solverState)(cellPos))
+    return act(removeNumberFromBoard(cellPos), removeNode)(solverState)
   }
 }
 
-export const nextStep = (solverState: SolverState): SolverState =>
+export const nextStep: SolverAction = solverState =>
   solverState.nodes.length === 0
-    ? setOutcome(solverState)(SolverModels.Outcomes.impossible)
+    ? setOutcome(SolverModels.Outcomes.impossible)(solverState)
     : processLastNode(incrementIterations(solverState))
 
-const decreasePointer = (solverState: SolverState): SolverState => {
+const decreasePointer: SolverAction = solverState => {
   const lastNode = solverState.nodes[solverState.nodes.length - 1]
   const lastNodeDecreased = {
     ...lastNode,
@@ -199,15 +213,17 @@ const decreasePointer = (solverState: SolverState): SolverState => {
   }
 }
 
-export const undoStep = (solverState: SolverState): SolverState => {
+export const undoStep: SolverAction = solverState => {
   return solverState.nodes.length > 1
-    ? decreasePointer(
-        removeNode(removeNumberFromBoard(solverState)(solverState.nodes[solverState.nodes.length - 2].cellPos)),
-      )
+    ? act(
+        decreasePointer,
+        removeNode,
+        removeNumberFromBoard(solverState.nodes[solverState.nodes.length - 2].cellPos),
+      )(solverState)
     : solverState
 }
 
-const fillboard = (solverState: SolverState): SolverState => {
+const fillboard: SolverAction = solverState => {
   let s = solverState
   while (s.outcome === SolverModels.Outcomes.unknown) {
     s = nextStep(s)
@@ -223,7 +239,7 @@ export const startCreateBoard = (config: types.DeepPartial<CreateBoardConfig> = 
   const board = Sudoku.createBoard(c)
   const solverState = createSolverState(board, c)
 
-  return addNode(solverState, buildAvailableNumbersMap(board, c))
+  return addNode(buildAvailableNumbersMap(board, c))(solverState)
 }
 
 export const solveBoard = (board: SudokuModels.Board, config: types.DeepPartial<SolverConfig> = {}) =>
@@ -233,5 +249,5 @@ export const startSolveBoard = (board: SudokuModels.Board, config: types.DeepPar
   const c = { ...defaultSolverConfig, ...board, ...config }
   const solverState = createSolverState(board, c)
 
-  return addNode(solverState, buildAvailableNumbersMap(board, c))
+  return addNode(buildAvailableNumbersMap(board, c))(solverState)
 }
