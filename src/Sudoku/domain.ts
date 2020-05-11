@@ -1,5 +1,5 @@
 import * as R from "ramda"
-import { types } from "../internal"
+import { types, utils } from "../internal"
 import * as Constraints from "./constraints"
 import { Board, BoardConfig, Cell, CellPos, emptyCell, numberCount, Rows } from "./models"
 
@@ -10,7 +10,7 @@ export const defaultBoardConfig = {
 }
 
 export const createBoard = (config: types.DeepPartial<BoardConfig>, cells?: Rows[]): Board => {
-  const c = { ...defaultBoardConfig, ...config}
+  const c = { ...defaultBoardConfig, ...config }
   const nc = numberCount(c)
 
   return {
@@ -25,14 +25,10 @@ export const cell = (board: Board) => (cellPos: CellPos): Cell => board.cells[ce
 
 export const cellIsEmpty = (board: Board) => (cellPos: CellPos) => cell(board)(cellPos) === emptyCell
 
-export const addNumber = (board: Board) => (n: number, cellPos: CellPos) => {
-  const newCells = R.clone(board.cells)
-  newCells[cellPos.row][cellPos.col] = n
-  return {
-    ...board,
-    cells: newCells,
-  }
-}
+export const setCell = (board: Board) => (n: number, cellPos: CellPos) => ({
+  ...board,
+  cells: utils.set2dCell(board.cells)(n, cellPos.row, cellPos.col),
+})
 
 export const clearCell = (board: Board) => (cellPos: CellPos) => {
   const newCells = R.clone(board.cells)
@@ -60,7 +56,7 @@ export const constrainedCells = (board: Board) => (cellPos: CellPos) => {
     ...box,
   ]
 
-  return cells.filter((c, i) => cells.findIndex((c1) => c1.row === c.row && c1.col === c.col) === i)
+  return cells.filter((c, i) => cells.findIndex(c1 => c1.row === c.row && c1.col === c.col) === i)
 }
 
 export const allCellsPos = (board: Board) => {

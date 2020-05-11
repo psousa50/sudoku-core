@@ -8,6 +8,7 @@ export interface Config {
   randomGenerator: utils.RandomGenerator
   useRandomCells: boolean
 }
+
 export interface CreateBoardConfig extends SudokuModels.BoardConfig, Config {}
 export type SolverConfig = Config
 export interface SolverNode {

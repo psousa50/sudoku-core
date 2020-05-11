@@ -85,7 +85,7 @@ export const buildNumberListFromBitMask = (bitMask: number) => {
 
 export const addNumberToBoard = (n: number, cellPos: SudokuModels.CellPos): SolverAction => solverState => ({
   ...solverState,
-  board: Sudoku.addNumber(solverState.board)(n, cellPos),
+  board: Sudoku.setCell(solverState.board)(n, cellPos),
   filledCount: solverState.filledCount + 1,
 })
 

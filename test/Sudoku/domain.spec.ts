@@ -16,7 +16,7 @@ describe("addNumber", () => {
   it("adds a number to a board", () => {
     const board = Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 })
 
-    const result = Sudoku.addNumber(board)(5, { row: 1, col: 3 })
+    const result = Sudoku.setCell(board)(5, { row: 1, col: 3 })
 
     // prettier-ignore
     const expectedBoard = [
@@ -32,7 +32,7 @@ describe("addNumber", () => {
   it("is immutable", () => {
     const board = Sudoku.createBoard({ boxWidth: 2, boxHeight: 2 })
 
-    Sudoku.addNumber(board)(5, { row: 1, col: 3 })
+    Sudoku.setCell(board)(5, { row: 1, col: 3 })
 
     // prettier-ignore
     const expectedBoard = [
@@ -57,7 +57,7 @@ it("getEmptyCellPos", () => {
     [1, 1],
   ].map((c) => ({ row: c[0], col: c[1] }))
 
-  const board = cells.reduce((b, cell, i) => Sudoku.addNumber(b)(i, cell), initialBoard)
+  const board = cells.reduce((b, cell, i) => Sudoku.setCell(b)(i, cell), initialBoard)
 
   expect(Sudoku.getFirstEmptyCellPos(board)).toEqual({ row: 1, col: 2 })
 })

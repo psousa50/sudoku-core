@@ -30,9 +30,25 @@ describe("Solves a board", () => {
 
     const result = Solver.solveBoard(board)
 
-    const expectedCells = ["436251", "512364", "254136", "361542", "625413", "143625"]
+    const expectedCells = [
+    // prettier-ignore
+    "436251",
+      "512364",
+      "254136",
+      "361542",
+      "625413",
+      "143625",
+    ]
 
     expect(result.board.cells).toEqual(helpers.buildBoardCells(expectedCells))
+  })
+
+  it("that's already done", () => {
+    const board = Solver.createBoard({ boxWidth: 2, boxHeight: 2 }).board
+
+    const result = Solver.solveBoard(board)
+
+    expect(result.nodes.length).toBe(0)
   })
 
   it("starting by the cell with less available numbers ", () => {
